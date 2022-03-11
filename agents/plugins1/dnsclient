@@ -1,0 +1,36 @@
+#!/bin/sh
+# Copyright (C) 2019 tribe29 GmbH - License: GNU General Public License v2
+# This file is part of Checkmk (https://checkmk.com). It is subject to the terms and
+# conditions defined in the file COPYING, which is part of this source code package.
+
+# Reason for this no-op: shellcheck disable=... before the first command disables the error for the
+# entire script.
+:
+
+# Disable unused variable error (needed to keep track of version)
+# shellcheck disable=SC2034
+CMK_VERSION="2.0.0p11"
+
+# This check can be used to test the name resolution of a given host
+# address using the local resolver of the system this script is
+# running on.
+
+HOSTADDRESSES=mathias-kettner.de
+
+if [ -e $MK_CONFDIR/dnsclient.cfg ] ; then
+    . $MK_CONFDIR/dnsclient.cfg
+fi
+
+echo "<<<mrpe>>>"
+for HOSTADDRESS in $HOSTADDRESSES
+do
+    ADDRESSES=`nslookup $HOSTADDRESS | sed -n -e 1,3d -e '/^Address: *\(.*\)$/s//\1/p'`
+    if [ ! "$ADDRESSES" ] ; then
+        STATE=2
+        OUTPUT="CRIT - $HOSTADDRESS could not be resolved"
+    else
+        STATE=0
+        OUTPUT="OK - $HOSTADDRESS resolved into $ADDRESSES"
+    fi
+    echo Resolve_$HOSTADDRESS $STATE $OUTPUT
+done

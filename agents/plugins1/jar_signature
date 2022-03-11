@@ -1,0 +1,40 @@
+#!/bin/bash
+# Copyright (C) 2019 tribe29 GmbH - License: GNU General Public License v2
+# This file is part of Checkmk (https://checkmk.com). It is subject to the terms and
+# conditions defined in the file COPYING, which is part of this source code package.
+
+# Reason for this no-op: shellcheck disable=... before the first command disables the error for the
+# entire script.
+:
+
+# Disable unused variable error (needed to keep track of version)
+# shellcheck disable=SC2034
+CMK_VERSION="2.0.0p11"
+
+# This agent uses the program "jarsigner" to read ssl certificate
+# information of jar files and outputs the information to stdout
+# for the Checkmk check.
+# We assume that all files in the jar archive are signed with the
+# same certificate. So we only deal with the last signed file here.
+
+JAVA_HOME=/home/oracle/bin/jdk_latest_version
+JAR_PATH=/home/oracle/fmw/11gR2/as_1/forms/java/*.jar
+
+# Let user override these defaults in a configuration file
+if [ -e $MK_CONFDIR/jar_signature.cfg ] ; then
+    . $MK_CONFDIR/jar_signature.cfg
+fi
+
+PATH=$JAVA_HOME/bin:$PATH
+
+echo "<<<jar_signature>>>"
+for JAR in $JAR_PATH; do
+    if [ -e "$JAR" ] ; then # avoid entry for '*.jar'
+        echo "[[[${JAR##*/}]]]"
+        OUTPUT=$(jarsigner -verify -verbose -certs "$JAR")
+        LINE=$(echo "$OUTPUT" | grep -n ^s | tail -n1 | cut -d: -f1)
+        echo "$(echo "$OUTPUT" | tail -n +$LINE)"
+        echo
+    fi
+done
+

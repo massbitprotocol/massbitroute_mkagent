@@ -1,0 +1,21 @@
+#!/bin/sh
+# Copyright (C) 2019 tribe29 GmbH - License: GNU General Public License v2
+# This file is part of Checkmk (https://checkmk.com). It is subject to the terms and
+# conditions defined in the file COPYING, which is part of this source code package.
+
+# Reason for this no-op: shellcheck disable=... before the first command disables the error for the
+# entire script.
+:
+
+# Disable unused variable error (needed to keep track of version)
+# shellcheck disable=SC2034
+CMK_VERSION="2.0.0p11"
+
+# This is not part of the standard agent since it can take very
+# long to run if your TCP/UDP table is large. Netstat seems to
+# have an execution time complexity of at least O(n^2) on Linux.
+
+echo '<<<netstat>>>'
+netstat -an -P tcp -f inet | awk '{printf "%s" "\ntcp\t", $0}' | awk '{printf ("%s %s %s %s %s %s\n", $1, $7, $5, $2, $3, $8)}' | awk 'NR>4' | sed -e 's/LISTEN/LISTENING/g' | sed '$d'
+
+netstat -an -P udp -f inet | awk '{printf "%s" "\nudp\t", $0}' | awk '{printf "%s - - %s %s\n", $1, $2, "0.0.0.0:*"}' | awk 'NR>4' | sed -e '$d'

@@ -1,0 +1,5 @@
+#!/bin/sh
+for s in graph-node chain-reader index-manager-main;do
+	count=$(ls /proc/$(pgrep $s)/fd |wc -l)
+	echo 0 "Open_file_$s" count=$count process $s open $count files
+done

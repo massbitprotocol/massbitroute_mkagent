@@ -1,0 +1,37 @@
+#!/bin/sh
+# Copyright (C) 2019 tribe29 GmbH - License: GNU General Public License v2
+# This file is part of Checkmk (https://checkmk.com). It is subject to the terms and
+# conditions defined in the file COPYING, which is part of this source code package.
+
+# Reason for this no-op: shellcheck disable=... before the first command disables the error for the
+# entire script.
+:
+
+# Disable unused variable error (needed to keep track of version)
+# shellcheck disable=SC2034
+CMK_VERSION="2.0.0p11"
+
+# this is for users who compiled statgrab on hp-ux.
+# note you'll need a 0.18+ version, from their github page at
+# https://github.com/i-scream/libstatgrab
+# flags used for compiling - disable documentation, examples and set*id
+
+
+if which statgrab > /dev/null ; then
+    if statgrab const. cpu. general. mem. page. proc. swap. user. > /tmp/statgrab.$$ 2>/dev/null
+        then
+        for s in proc cpu page
+        do
+            echo "<<<statgrab_$s>>>"
+            cat /tmp/statgrab.$$ | grep "^$s\." | cut -d. -f2-99 | sed 's/ *= */ /'
+        done
+
+        echo '<<<statgrab_mem>>>'
+        cat /tmp/statgrab.$$ | egrep "^(swap|mem)\." | sed 's/ *= */ /'
+
+        echo '<<<uptime>>>'
+        cat /tmp/statgrab.$$ | egrep "^general\.uptime" | sed 's/.* //'
+
+    fi
+    [ -f /tmp/statgrab.$$ ] && rm -f /tmp/statgrab.$$
+fi

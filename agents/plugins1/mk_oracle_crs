@@ -1,0 +1,132 @@
+#!/bin/bash
+# Copyright (C) 2019 tribe29 GmbH - License: GNU General Public License v2
+# This file is part of Checkmk (https://checkmk.com). It is subject to the terms and
+# conditions defined in the file COPYING, which is part of this source code package.
+
+# Reason for this no-op: shellcheck disable=... before the first command disables the error for the
+# entire script.
+:
+
+# Disable unused variable error (needed to keep track of version)
+# shellcheck disable=SC2034
+CMK_VERSION="2.0.0p11"
+
+# Developed by Thorsten Bruhns from OPITZ CONSULTING Deutschland GmbH
+
+set -f
+
+resourcefilter="^NAME=|^TYPE=|^STATE=|^TARGET=|^ENABLED="
+
+#   .--Functions-----------------------------------------------------------.
+#   |             _____                 _   _                              |
+#   |            |  ___|   _ _ __   ___| |_(_) ___  _ __  ___              |
+#   |            | |_ | | | | '_ \ / __| __| |/ _ \| '_ \/ __|             |
+#   |            |  _|| |_| | | | | (__| |_| | (_) | | | \__ \             |
+#   |            |_|   \__,_|_| |_|\___|\__|_|\___/|_| |_|___/             |
+#   |                                                                      |
+#   +----------------------------------------------------------------------+
+#   |                                                                      |
+#   '----------------------------------------------------------------------'
+
+function set_osenv () {
+    ostype=$(uname -s)
+    if [ "$ostype" = 'Linux' ] ; then
+        ocrcfgfile=/etc/oracle/ocr.loc
+        olrcfgfile=/etc/oracle/olr.loc
+        GREP=$(which grep)
+    elif [ "$ostype" = 'SunOS' ] ; then
+        ocrcfgfile=/var/opt/oracle/ocr.loc
+        olrcfgfile=/var/opt/oracle/olr.loc
+        GREP=/usr/xpg4/bin/grep
+    else
+        ostype="unknown OS: ${ostype}"
+        exit 1
+    fi
+}
+
+function set_has_env(){
+    test -f ${ocrcfgfile} || exit 0
+    local_has_type=$($GREP "^local_only=" "$ocrcfgfile" | cut -d"=" -f2 | tr '[:lower:]' '[:upper:]')
+    local_has_type=${local_has_type:-"FALSE"}
+
+    if [ -f ${olrcfgfile} ] ; then
+        has_ORACLE_HOME=$($GREP "^crs_home=" "$olrcfgfile" | cut -d"=" -f2)
+    else
+        # There is no olr.cfg in 10.2 and 11.1
+        # we try to get the ORA_CRS_HOME from /etc/init.d/init.cssd
+        local_has_type=FALSE
+        INITCSSD=/etc/init.d/init.cssd
+        if [ ! -f ${INITCSSD} ] ; then
+            exit 0
+        else
+            has_ORACLE_HOME=$($GREP "^ORA_CRS_HOME=" ${INITCSSD} | cut -d"=" -f2-)
+        fi
+    fi
+
+    CRSCTL=${has_ORACLE_HOME}/bin/crsctl
+    OLSNODES=${has_ORACLE_HOME}/bin/olsnodes
+    CRS_STAT=${has_ORACLE_HOME}/bin/crs_stat
+}
+
+function printhasdata() {
+    ps -ef | $GREP -v grep | $GREP cssd.bin > /dev/null || exit 0
+
+    echo "<<<oracle_crs_version:sep(124)>>>"
+    $CRSCTL query has releaseversion
+
+    echo "<<<oracle_crs_res:sep(124)>>>"
+    OLS_NODENAME=$(uname -n)
+    echo "nodename|$OLS_NODENAME"
+    $CRSCTL stat res -f | $GREP -E $resourcefilter | sed "s/^/csslocal\|/"
+}
+
+function printcrsdata() {
+    ps -ef | $GREP -v grep | $GREP -e ohasd.bin -e crsd.bin > /dev/null || exit 0
+
+    echo "<<<oracle_crs_version:sep(124)>>>"
+    crs_version=$($CRSCTL query crs releaseversion)
+    echo "$crs_version"
+
+    echo "<<<oracle_crs_voting>>>"
+    $CRSCTL query css votedisk | $GREP "^ [0-9]"
+
+    ps -ef | $GREP -v grep | $GREP crsd.bin > /dev/null || exit 0
+    echo "<<<oracle_crs_res:sep(124)>>>"
+    OLS_NODENAME=$($OLSNODES -l)
+
+    echo "nodename|$OLS_NODENAME"
+
+    crs_version_short=$(echo "$crs_version" | cut -d"[" -f2- | cut -d"." -f-2 | sed 's/\.//')
+    if [ "$crs_version_short" -ge 112 ] ; then
+        $CRSCTL stat res -v -n "$OLS_NODENAME" -init | $GREP -E "$resourcefilter" | sed "s/^/csslocal\|/"
+        for nodelist in $($OLSNODES)
+        do
+            $CRSCTL stat res -v -n "$nodelist" | $GREP -E "$resourcefilter" | sed "s/^/$nodelist\|/"
+        done
+    else
+        $CRS_STAT -f -c "$OLS_NODENAME" | $GREP -E "$resourcefilter" | sed "s/^/$OLS_NODENAME\|/"
+    fi
+}
+
+#.
+#   .--Main----------------------------------------------------------------.
+#   |                        __  __       _                                |
+#   |                       |  \/  | __ _(_)_ __                           |
+#   |                       | |\/| |/ _` | | '_ \                          |
+#   |                       | |  | | (_| | | | | |                         |
+#   |                       |_|  |_|\__,_|_|_| |_|                         |
+#   |                                                                      |
+#   +----------------------------------------------------------------------+
+#   |                                                                      |
+#   '----------------------------------------------------------------------'
+
+set_osenv
+set_has_env
+echo "<<<oracle_crs_res>>>"
+echo "<<<oracle_crs_version>>>"
+echo "<<<oracle_crs_votedisk>>>"
+if [ $local_has_type = 'FALSE' ] ; then
+    printcrsdata
+else
+    printhasdata
+fi

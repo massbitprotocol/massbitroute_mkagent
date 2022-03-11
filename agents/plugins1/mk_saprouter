@@ -1,0 +1,27 @@
+#!/bin/bash
+# Copyright (C) 2019 tribe29 GmbH - License: GNU General Public License v2
+# This file is part of Checkmk (https://checkmk.com). It is subject to the terms and
+# conditions defined in the file COPYING, which is part of this source code package.
+
+# Reason for this no-op: shellcheck disable=... before the first command disables the error for the
+# entire script.
+:
+
+# Disable unused variable error (needed to keep track of version)
+# shellcheck disable=SC2034
+CMK_VERSION="2.0.0p11"
+
+# Plugin for SAP router
+
+
+. $MK_CONFDIR/saprouter.cfg || exit 1
+
+
+if [ ! -z "$SAPROUTER_USER" -a ! -z "$SAPGENPSE_PATH" ]
+then
+    if type ${SAPGENPSE_PATH}/sapgenpse > /dev/null
+    then
+        echo "<<<saprouter_cert>>>"
+        su - $SAPROUTER_USER -c "${SAPGENPSE_PATH}/sapgenpse get_my_name -n validity 2>&1"
+    fi
+fi
