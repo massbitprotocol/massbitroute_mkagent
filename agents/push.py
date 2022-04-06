@@ -20,10 +20,11 @@ if __name__ == "__main__":
             print(url_post)
             resp = requests.post(url_post, data=agent_data)
             if resp.status_code != 200:
-                # time.sleep(30)
-                # continue
+                time.sleep(30)
+                continue
                 raise RuntimeError("Server responded with " + str(resp))
-            time.sleep(30)
+
         except Exception as e:
             print(e)
-            # continue
+            time.sleep(30)
+            continue
