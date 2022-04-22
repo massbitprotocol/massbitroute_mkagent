@@ -1,0 +1,16 @@
+#!/bin/bash
+SITE_ROOT=$(realpath $(dirname $(realpath $0))/..)
+pip="pip install "
+cd $SITE_ROOT
+_prepare(){
+	if [ ! -f "/usr/bin/python3" ]; then
+		apt install -y python3
+	fi
+
+	if [ ! -f "/usr/bin/pip" ]; then
+		apt install -y python3-pip
+	fi
+	$pip --upgrade pip
+	$pip -r $SITE_ROOT/agents/requirements.txt
+}
+$@
