@@ -48,7 +48,7 @@ _kill() {
 }
 case $1 in
 _kill)
-	$@
+	_kill
 	;;
 *)
 	TYPE=$(cat $SITE_ROOT/vars/TYPE)
