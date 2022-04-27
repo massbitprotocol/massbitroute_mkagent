@@ -22,10 +22,10 @@ cd $dir
 # fi
 
 export URL=https://monitor.mbr.$DOMAIN
-export PORTAL_DOMAIN=https://dapi.$DOMAIN
+export PORTAL_DOMAIN=dapi.$DOMAIN
 
 tmp=$(mktemp)
-curl -sSfL https://$PORTAL_DOMAIN/deploy/hosts -o $tmp >/dev/nul
+curl -ksSfL https://$PORTAL_DOMAIN/deploy/hosts -o $tmp >/dev/nul
 
 while read _ip _host; do
 	echo $_ip $_host
