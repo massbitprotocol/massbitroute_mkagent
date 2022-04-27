@@ -26,7 +26,7 @@ export PORTAL_DOMAIN=dapi.$DOMAIN
 
 tmp=$(mktemp)
 curl -ksSfL https://$PORTAL_DOMAIN/deploy/hosts -o $tmp >/dev/nul
-
+echo >>$tmp
 while read _ip _host; do
 	echo $_ip $_host
 	grep $_host /etc/hosts >/dev/null
