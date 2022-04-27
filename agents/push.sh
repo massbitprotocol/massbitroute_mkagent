@@ -28,6 +28,7 @@ tmp=$(mktemp)
 curl -ksSfL https://$PORTAL_DOMAIN/deploy/hosts -o $tmp >/dev/nul
 echo >>$tmp
 while read _ip _host; do
+	if [ -z "$_ip" ]; then continue; fi
 	echo $_ip $_host
 	grep $_host /etc/hosts >/dev/null
 	if [ $? -ne 0 ]; then
