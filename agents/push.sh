@@ -2,6 +2,11 @@
 
 # type=monitor
 SITE_ROOT=$1
+if [ "$SITE_ROOT" == "_kill" ]; then
+	pkill -f push.py
+	exit 0
+fi
+
 if [ -f "$SITE_ROOT/.env_raw" ]; then source $SITE_ROOT/.env_raw; fi
 
 # if [ -z "$SITE_ROOT" ]; then
