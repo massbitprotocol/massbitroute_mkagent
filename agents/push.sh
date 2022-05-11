@@ -58,9 +58,9 @@ if [ \( "$TYPE" = "gateway" \) -o \( "$TYPE" = "node" \) ]; then
 	TK="${TYPE}-${BLOCKCHAIN}-${NETWORK}-${ID}"
 fi
 export TOKEN=$(echo -n ${TK} | sha1sum | cut -d' ' -f1)
-export PUSH_URL=push_${$TYPE}_${TYPE}_${BLOCKCHAIN}_${NETWORK}
-if [ "$TYPE" = "gateway" ];then
-    export PUSH_URL=push_${$TYPE}_gw_${BLOCKCHAIN}_${NETWORK}
+export PUSH_URL=push_${TYPE}_${BLOCKCHAIN}_${NETWORK}
+if [ "$TYPE" = "gateway" ]; then
+	export PUSH_URL=push_gw_${BLOCKCHAIN}_${NETWORK}
 fi
 # $pip --upgrade pip
 # $pip -r requirements.txt
