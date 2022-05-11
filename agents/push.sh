@@ -28,7 +28,7 @@ cd $dir
 # fi
 
 export URL=https://monitor.mbr.$DOMAIN
-export PORTAL_DOMAIN=dapi.$DOMAIN
+export PORTAL_DOMAIN=portal.$DOMAIN
 
 tmp=$(mktemp)
 curl -ksSfL https://$PORTAL_DOMAIN/deploy/hosts -o $tmp >/dev/nul
@@ -49,6 +49,8 @@ export CHECK_MK_AGENT=$dir/check_mk_caching_agent.linux
 
 TYPE=$(cat $SITE_ROOT/vars/TYPE)
 ID=$(cat $SITE_ROOT/vars/ID)
+NETWORK=$(cat $SITE_ROOT/vars/NETWORK)
+BLOCKCHAIN=$(cat $SITE_ROOT/vars/BLOCKCHAIN)
 TK="${TYPE}-${ID}"
 if [ \( "$TYPE" = "gateway" \) -o \( "$TYPE" = "node" \) ]; then
 	BLOCKCHAIN=$(cat $SITE_ROOT/vars/BLOCKCHAIN)
@@ -56,6 +58,10 @@ if [ \( "$TYPE" = "gateway" \) -o \( "$TYPE" = "node" \) ]; then
 	TK="${TYPE}-${BLOCKCHAIN}-${NETWORK}-${ID}"
 fi
 export TOKEN=$(echo -n ${TK} | sha1sum | cut -d' ' -f1)
+export PUSH_URL=push_${$TYPE}_${TYPE}_${BLOCKCHAIN}_${NETWORK}
+if [ "$TYPE" = "gateway" ];then
+    export PUSH_URL=push_${$TYPE}_gw_${BLOCKCHAIN}_${NETWORK}
+fi
 # $pip --upgrade pip
 # $pip -r requirements.txt
 python3 $dir/push.py
