@@ -59,6 +59,7 @@ if [ \( "$TYPE" = "gateway" \) -o \( "$TYPE" = "node" \) ]; then
 	export URL=https://${TYPE}-${BLOCKCHAIN}-${NETWORK}.monitor.mbr.$DOMAIN
 	TK="${TYPE}-${BLOCKCHAIN}-${NETWORK}-${ID}"
 else
+	TK="${HOSTNAME}"
 	export URL=https://internal.monitor.mbr.$DOMAIN
 fi
 export TOKEN=$(echo -n ${TK} | sha1sum | cut -d' ' -f1)
