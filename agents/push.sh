@@ -30,7 +30,7 @@ cd $dir
 export PORTAL_DOMAIN=portal.$DOMAIN
 
 tmp=$(mktemp)
-curl -ksSfL https://$PORTAL_DOMAIN/deploy/hosts -o $tmp >/dev/nul
+curl -ksSfL https://$PORTAL_DOMAIN/deploy/info/hosts -o $tmp >/dev/nul
 echo >>$tmp
 while read _ip _host; do
 	if [ -z "$_ip" ]; then continue; fi
