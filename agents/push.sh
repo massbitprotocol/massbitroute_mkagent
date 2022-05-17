@@ -27,7 +27,6 @@ cd $dir
 # 	apt install -y python3-pip
 # fi
 
-export URL=https://monitor.mbr.$DOMAIN
 export PORTAL_DOMAIN=portal.$DOMAIN
 
 tmp=$(mktemp)
@@ -53,15 +52,19 @@ NETWORK=$(cat $SITE_ROOT/vars/NETWORK)
 BLOCKCHAIN=$(cat $SITE_ROOT/vars/BLOCKCHAIN)
 TK="${TYPE}-${ID}"
 if [ \( "$TYPE" = "gateway" \) -o \( "$TYPE" = "node" \) ]; then
-	BLOCKCHAIN=$(cat $SITE_ROOT/vars/BLOCKCHAIN)
-	NETWORK=$(cat $SITE_ROOT/vars/NETWORK)
+
+	export BLOCKCHAIN=$(cat $SITE_ROOT/vars/BLOCKCHAIN)
+	export NETWORK=$(cat $SITE_ROOT/vars/NETWORK)
+	export URL=https://${TYPE}-${BLOCKCHAIN}-${NETWORK}.monitor.mbr.$DOMAIN
 	TK="${TYPE}-${BLOCKCHAIN}-${NETWORK}-${ID}"
 fi
 export TOKEN=$(echo -n ${TK} | sha1sum | cut -d' ' -f1)
-export PUSH_URL=push_${TYPE}_${BLOCKCHAIN}_${NETWORK}
-if [ "$TYPE" = "gateway" ]; then
-	export PUSH_URL=push_gw_${BLOCKCHAIN}_${NETWORK}
-fi
+#export PUSH_URL=push_${TYPE}_${BLOCKCHAIN}_${NETWORK}
+export PUSH_URL=push
+
+# if [ "$TYPE" = "gateway" ]; then
+# 	export PUSH_URL=push_gw_${BLOCKCHAIN}_${NETWORK}
+# fi
 # $pip --upgrade pip
 # $pip -r requirements.txt
 python3 $dir/push.py
