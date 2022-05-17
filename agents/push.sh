@@ -52,11 +52,12 @@ NETWORK=$(cat $SITE_ROOT/vars/NETWORK)
 BLOCKCHAIN=$(cat $SITE_ROOT/vars/BLOCKCHAIN)
 TK="${TYPE}-${ID}"
 if [ \( "$TYPE" = "gateway" \) -o \( "$TYPE" = "node" \) ]; then
-
 	export BLOCKCHAIN=$(cat $SITE_ROOT/vars/BLOCKCHAIN)
 	export NETWORK=$(cat $SITE_ROOT/vars/NETWORK)
 	export URL=https://${TYPE}-${BLOCKCHAIN}-${NETWORK}.monitor.mbr.$DOMAIN
 	TK="${TYPE}-${BLOCKCHAIN}-${NETWORK}-${ID}"
+else
+	export URL=https://internal.monitor.mbr.$DOMAIN
 fi
 export TOKEN=$(echo -n ${TK} | sha1sum | cut -d' ' -f1)
 #export PUSH_URL=push_${TYPE}_${BLOCKCHAIN}_${NETWORK}
