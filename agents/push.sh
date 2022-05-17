@@ -48,8 +48,6 @@ export CHECK_MK_AGENT=$dir/check_mk_caching_agent.linux
 
 TYPE=$(cat $SITE_ROOT/vars/TYPE)
 ID=$(cat $SITE_ROOT/vars/ID)
-NETWORK=$(cat $SITE_ROOT/vars/NETWORK)
-BLOCKCHAIN=$(cat $SITE_ROOT/vars/BLOCKCHAIN)
 TK="${TYPE}-${ID}"
 if [ \( "$TYPE" = "gateway" \) -o \( "$TYPE" = "node" \) ]; then
 	export BLOCKCHAIN=$(cat $SITE_ROOT/vars/BLOCKCHAIN)
