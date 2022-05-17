@@ -47,6 +47,10 @@ export CHECK_MK_AGENT=$dir/check_mk_caching_agent.linux
 # ok1 export MK_SKIP_PS=true
 
 TYPE=$(cat $SITE_ROOT/vars/TYPE)
+if [ ! -f "$SITE_ROOT/vars/ID" ]; then
+	echo 1 >$SITE_ROOT/vars/ID
+fi
+
 ID=$(cat $SITE_ROOT/vars/ID)
 TK="${TYPE}-${ID}"
 if [ \( "$TYPE" = "gateway" \) -o \( "$TYPE" = "node" \) ]; then
