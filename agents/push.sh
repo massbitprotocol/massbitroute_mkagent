@@ -12,7 +12,7 @@ if [ -z "$SITE_ROOT" ]; then exit 0; fi
 # 	exit 0
 # fi
 
-source $SITE_ROOT/.env.raw
+source $SITE_ROOT/.env_raw
 export PORTAL_DOMAIN=portal.$DOMAIN
 
 cd $dir
