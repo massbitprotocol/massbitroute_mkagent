@@ -65,7 +65,7 @@ _push() {
 	export PUSH_URL=push
 	/usr/bin/python3 push.py
 }
-if [ $# -eq 0 ]; then
+if [ $# -eq 1 ]; then
 	(
 		echo "$sc $SITE_ROOT _push"
 		echo "$sc $SITE_ROOT _update_local_check"
