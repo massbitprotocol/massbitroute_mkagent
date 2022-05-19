@@ -1,0 +1,5 @@
+#!/bin/bash
+check_http="/usr/lib/nagios/plugins/check_http"
+if [ ! -f "$check_http" ]; then
+	apt install -y monitoring-plugins
+fi
