@@ -21,7 +21,11 @@ if [ -f "$_data_uri_f" ]; then
 	_port=$(echo $_hostname1 | awk -F':' '{print $2}')
 	_port_opt=""
 	_path=$(echo $_data_uri | cut -d'/' -f4-)
-	if [ -z "$_path" ]; then _path="/"; fi
+	if [ -z "$_path" ]; then
+		_path="/"
+	else
+		_path="/$_path"
+	fi
 
 	if [ -n "$_port" ]; then
 		_port_opt="-p $_port"
