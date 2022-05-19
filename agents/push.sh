@@ -23,6 +23,7 @@ elif [ "$SITE_ROOT" == "_update_local_check" ]; then
 	exit 0
 fi
 
+source $SITE_ROOT/.env.raw
 export PORTAL_DOMAIN=portal.$DOMAIN
 
 tmp=$(mktemp)
@@ -63,7 +64,7 @@ export TOKEN=$(echo -n ${TK} | sha1sum | cut -d' ' -f1)
 export PUSH_URL=push
 
 (
-	echo "python3 $dir/push.py"
+	echo "/usr/bin/python3 $dir/push.py"
 	echo "$sc _update_local_check"
 ) | parallel -j2
 
