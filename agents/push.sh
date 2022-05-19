@@ -1,31 +1,27 @@
 #!/bin/bash
+sc=$(realpath $0)
+dir=$(dirname $sc)
+cd $dir
+if [ ! -f "/usr/bin/parallel" ]; then apt install -y parallel; fi
 
-# type=monitor
+_update_local_check() {
+	while true; do
+		find $dir/local -type f -iname '*.sh' | while read cmd; do
+			bash $cmd 1
+		done
+		sleep 30
+	done
+}
+
 SITE_ROOT=$1
 if [ -z "$SITE_ROOT" ]; then exit 0; fi
 if [ "$SITE_ROOT" == "_kill" ]; then
 	pkill -f push.py
 	exit 0
+elif [ "$SITE_ROOT" == "_update_local_check" ]; then
+	_update_local_check
+	exit 0
 fi
-
-if [ -f "$SITE_ROOT/.env_raw" ]; then source $SITE_ROOT/.env_raw; fi
-
-# if [ -z "$SITE_ROOT" ]; then
-# 	SITE_ROOT=/massbit/massbitroute/app/src/sites/services/$type
-# fi
-
-# dir=$SITE_ROOT/etc/mkagent/agents
-dir=$(dirname $(realpath $0))
-# pip="pip install "
-cd $dir
-
-# if [ ! -f "/usr/bin/python3" ]; then
-# 	apt install -y python3
-# fi
-
-# if [ ! -f "/usr/bin/pip" ]; then
-# 	apt install -y python3-pip
-# fi
 
 export PORTAL_DOMAIN=portal.$DOMAIN
 
@@ -63,15 +59,13 @@ else
 	export URL=https://internal.monitor.mbr.$DOMAIN
 fi
 export TOKEN=$(echo -n ${TK} | sha1sum | cut -d' ' -f1)
-#export PUSH_URL=push_${TYPE}_${BLOCKCHAIN}_${NETWORK}
+
 export PUSH_URL=push
 
-# if [ "$TYPE" = "gateway" ]; then
-# 	export PUSH_URL=push_gw_${BLOCKCHAIN}_${NETWORK}
-# fi
-# $pip --upgrade pip
-# $pip -r requirements.txt
-python3 $dir/push.py
+(
+	echo "python3 $dir/push.py"
+	echo "$sc _update_local_check"
+) | parallel -j2
 
 # if [ $# -le 2 ]; then
 # 	# $pip --upgrade pip
