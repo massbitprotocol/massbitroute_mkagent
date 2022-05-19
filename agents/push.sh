@@ -1,6 +1,20 @@
 #!/bin/bash
 sc=$(realpath $0)
 dir=$(dirname $sc)
+SITE_ROOT=$1
+if [ -z "$SITE_ROOT" ]; then exit 0; fi
+
+# if [ "$SITE_ROOT" == "_kill" ]; then
+# 	pkill -f push.py
+# 	exit 0
+# elif [ "$SITE_ROOT" == "_update_local_check" ]; then
+# 	_update_local_check
+# 	exit 0
+# fi
+
+source $SITE_ROOT/.env.raw
+export PORTAL_DOMAIN=portal.$DOMAIN
+
 cd $dir
 if [ ! -f "/usr/bin/parallel" ]; then apt install -y parallel; fi
 
@@ -12,62 +26,53 @@ _update_local_check() {
 		sleep 30
 	done
 }
+_push() {
+	tmp=$(mktemp)
+	curl -ksSfL https://$PORTAL_DOMAIN/deploy/info/hosts -o $tmp >/dev/nul
+	echo >>$tmp
+	while read _ip _host; do
+		if [ -z "$_ip" ]; then continue; fi
+		echo $_ip $_host
+		grep $_host /etc/hosts >/dev/null
+		if [ $? -ne 0 ]; then
+			echo $_ip $_host >>/etc/hosts
+		fi
+	done <$tmp
+	rm $tmp
+	# export CHECK_MK_AGENT=$dir/check_mk_agent.linux
+	export CHECK_MK_AGENT=$dir/check_mk_caching_agent.linux
 
-SITE_ROOT=$1
-if [ -z "$SITE_ROOT" ]; then exit 0; fi
-if [ "$SITE_ROOT" == "_kill" ]; then
-	pkill -f push.py
-	exit 0
-elif [ "$SITE_ROOT" == "_update_local_check" ]; then
-	_update_local_check
-	exit 0
-fi
+	# ok1 export MK_SKIP_PS=true
 
-source $SITE_ROOT/.env.raw
-export PORTAL_DOMAIN=portal.$DOMAIN
-
-tmp=$(mktemp)
-curl -ksSfL https://$PORTAL_DOMAIN/deploy/info/hosts -o $tmp >/dev/nul
-echo >>$tmp
-while read _ip _host; do
-	if [ -z "$_ip" ]; then continue; fi
-	echo $_ip $_host
-	grep $_host /etc/hosts >/dev/null
-	if [ $? -ne 0 ]; then
-		echo $_ip $_host >>/etc/hosts
+	TYPE=$(cat $SITE_ROOT/vars/TYPE)
+	if [ ! -f "$SITE_ROOT/vars/ID" ]; then
+		echo 1 >$SITE_ROOT/vars/ID
 	fi
-done <$tmp
-rm $tmp
-# export CHECK_MK_AGENT=$dir/check_mk_agent.linux
-export CHECK_MK_AGENT=$dir/check_mk_caching_agent.linux
 
-# ok1 export MK_SKIP_PS=true
+	ID=$(cat $SITE_ROOT/vars/ID)
+	TK="${TYPE}-${ID}"
+	if [ \( "$TYPE" = "gateway" \) -o \( "$TYPE" = "node" \) ]; then
+		export BLOCKCHAIN=$(cat $SITE_ROOT/vars/BLOCKCHAIN)
+		export NETWORK=$(cat $SITE_ROOT/vars/NETWORK)
+		export URL=https://${TYPE}-${BLOCKCHAIN}-${NETWORK}.monitor.mbr.$DOMAIN
+		TK="${TYPE}-${BLOCKCHAIN}-${NETWORK}-${ID}"
+	else
+		TK="${HOSTNAME}"
+		export URL=https://internal.monitor.mbr.$DOMAIN
+	fi
+	export TOKEN=$(echo -n ${TK} | sha1sum | cut -d' ' -f1)
 
-TYPE=$(cat $SITE_ROOT/vars/TYPE)
-if [ ! -f "$SITE_ROOT/vars/ID" ]; then
-	echo 1 >$SITE_ROOT/vars/ID
-fi
-
-ID=$(cat $SITE_ROOT/vars/ID)
-TK="${TYPE}-${ID}"
-if [ \( "$TYPE" = "gateway" \) -o \( "$TYPE" = "node" \) ]; then
-	export BLOCKCHAIN=$(cat $SITE_ROOT/vars/BLOCKCHAIN)
-	export NETWORK=$(cat $SITE_ROOT/vars/NETWORK)
-	export URL=https://${TYPE}-${BLOCKCHAIN}-${NETWORK}.monitor.mbr.$DOMAIN
-	TK="${TYPE}-${BLOCKCHAIN}-${NETWORK}-${ID}"
+	export PUSH_URL=push
+	/usr/bin/python3 push.py
+}
+if [ $# -eq 0 ]; then
+	(
+		echo "$sc _push"
+		echo "$sc _update_local_check"
+	) | parallel -j2
 else
-	TK="${HOSTNAME}"
-	export URL=https://internal.monitor.mbr.$DOMAIN
+	$@
 fi
-export TOKEN=$(echo -n ${TK} | sha1sum | cut -d' ' -f1)
-
-export PUSH_URL=push
-
-(
-	echo "/usr/bin/python3 $dir/push.py"
-	echo "$sc _update_local_check"
-) | parallel -j2
-
 # if [ $# -le 2 ]; then
 # 	# $pip --upgrade pip
 # 	$pip -r requirements.txt
