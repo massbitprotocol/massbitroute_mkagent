@@ -13,7 +13,7 @@ if [ -f "$_data_uri_f" ]; then
 		_ssl_opt="--ssl"
 	fi
 	_hostname=$(echo $_data_uri | awk -F[/:] '{print $4}')
-	_checkname="mbr-datasource-$_hostname"
+	_checkname="mbr-datasource-$_data_uri"
 	$check_http -H $_hostname -u $_data_uri -T application/json --method=POST --post='{"id": "blockNumber", "jsonrpc": "2.0", "method": "eth_getBlockByNumber", "params": ["latest", false]}' -t 3 $_ssl_opt | tail -1 |
 		awk -F'|' -v checkname=$_checkname '{st=0;perf="-";if(index($1,"CRITICAL") != 0){st=2} else if(index($1,"WARNING") != 0){st=1} else {gsub(/ /,"|",$2);perf=$2;};print st,checkname,perf,$1}'
 fi
