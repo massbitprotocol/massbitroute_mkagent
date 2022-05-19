@@ -67,8 +67,8 @@ _push() {
 }
 if [ $# -eq 0 ]; then
 	(
-		echo "$sc _push"
-		echo "$sc _update_local_check"
+		echo "$sc $SITE_ROOT _push"
+		echo "$sc $SITE_ROOT _update_local_check"
 	) | parallel -j2
 else
 	$@
