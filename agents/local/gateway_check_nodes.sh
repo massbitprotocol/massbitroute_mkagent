@@ -22,7 +22,8 @@ _http() {
 }
 if [ -f "$_nodes" ]; then
 	cache=$1
-	if [ $cache -eq 1 ]; then
+	if [ -z "$cache" ]; then cache=0; fi
+	if [ $cache -ne 1 ]; then
 		if [ -f "/tmp/gateway_check_nodes" ]; then
 			cat /tmp/gateway_check_nodes
 		fi
