@@ -1,7 +1,6 @@
 #!/bin/bash
 _nodes=/massbit/massbitroute/app/src/sites/services/gateway/http.d/gw-dot-mainnet-nodes.conf
 check_http="/usr/lib/nagios/plugins/check_http"
-_post_data=
 _http() {
 	_hostname=$1
 	_id=$(echo $_hostname | cut -d'.' -f1)
@@ -22,13 +21,21 @@ _http() {
 
 }
 if [ -f "$_nodes" ]; then
+	cache=$1
+	if [ $cache -eq 1 ]; then
+		cat /tmp/gateway_check_nodes
+		exit 0
+	fi
+
 	_blockchain="/massbit/massbitroute/app/src/sites/services/gateway/vars/BLOCKCHAIN"
 
+	tmp=$(mktemp)
 	awk -f /massbit/massbitroute/app/src/sites/services/mkagent/agents/extract_nodes.awk /massbit/massbitroute/app/src/sites/services/gateway/http.d/gw-dot-mainnet-nodes.conf | while read _token _domain _url; do
 		_path="/"
 		_ip=$(echo $_url | cut -d'/' -f3)
 		_port=443
-		_http $_domain $_ip $_port $_path $_token $_blockchain
+		_http $_domain $_ip $_port $_path $_token $_blockchain >>$tmp
 
 	done
+	mv $tmp >/tmp/gateway_check_nodes
 fi
