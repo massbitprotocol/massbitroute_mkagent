@@ -41,5 +41,5 @@ if [ -f "$_nodes" ]; then
 		_http $_domain $_ip $_port $_path $_token $_blockchain >>$tmp
 
 	done
-	mv $tmp >/tmp/gateway_check_nodes
+	mv $tmp /tmp/gateway_check_nodes
 fi
