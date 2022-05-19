@@ -43,7 +43,7 @@ PLUGINSDIR=$MK_LIBDIR/plugins
 # All executables in LOCALDIR will by executabled and their
 # output inserted into the section <<<local>>>. Please
 # refer to online documentation for details about local checks.
-LOCALDIR=/massbit/massbitroute/app/src/sites/services/monitor/scripts/checkmk
+LOCALDIR=/massbit/massbitroute/app/src/sites/services/mkagent/agents/local
 #${LOCALDIR:-$MK_LIBDIR/local}
 
 # All files in SPOOLDIR will simply appended to the agent
