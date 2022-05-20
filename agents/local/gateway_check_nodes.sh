@@ -3,6 +3,7 @@ _blockchain_f="/massbit/massbitroute/app/src/sites/services/gateway/vars/BLOCKCH
 _network_f="/massbit/massbitroute/app/src/sites/services/gateway/vars/NETWORK"
 _blockchain="eth"
 _network="mainnet"
+_timeout=0.3
 if [ -f "$_blockchain_f" ]; then
 	_blockchain=$(cat $_blockchain_f)
 fi
@@ -23,10 +24,10 @@ _http() {
 
 	_checkname="mbr-node-$_id"
 	if [ "$_blockchain" == "dot" ]; then
-		$check_http -H $_hostname -k "x-api-key: $_token" -u $_path -T application/json --method=POST --post='{"jsonrpc":"2.0","method":"chain_getBlock","params": [],"id": 1}' -t 3 --ssl -p $_port | tail -1 |
+		$check_http -H $_hostname -k "x-api-key: $_token" -u $_path -T application/json --method=POST --post='{"jsonrpc":"2.0","method":"chain_getBlock","params": [],"id": 1}' -t $_timeout --ssl -p $_port | tail -1 |
 			awk -F'|' -v checkname=$_checkname '{st=0;perf="-";if(index($1,"CRITICAL") != 0){st=2} else if(index($1,"WARNING") != 0){st=1} else {gsub(/ /,"|",$2);perf=$2;};print st,checkname,perf,$1}'
 	else
-		$check_http -H $_hostname -k "x-api-key: $_token" -u $_path -T application/json --method=POST --post='{"id": "blockNumber", "jsonrpc": "2.0", "method": "eth_getBlockByNumber", "params": ["latest", false]}' -t 3 --ssl -p $_port | tail -1 |
+		$check_http -H $_hostname -k "x-api-key: $_token" -u $_path -T application/json --method=POST --post='{"id": "blockNumber", "jsonrpc": "2.0", "method": "eth_getBlockByNumber", "params": ["latest", false]}' -t $_timeout --ssl -p $_port | tail -1 |
 			awk -F'|' -v checkname=$_checkname '{st=0;perf="-";if(index($1,"CRITICAL") != 0){st=2} else if(index($1,"WARNING") != 0){st=1} else {gsub(/ /,"|",$2);perf=$2;};print st,checkname,perf,$1}'
 	fi
 
