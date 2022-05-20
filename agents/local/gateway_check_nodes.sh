@@ -3,7 +3,7 @@ _blockchain_f="/massbit/massbitroute/app/src/sites/services/gateway/vars/BLOCKCH
 _network_f="/massbit/massbitroute/app/src/sites/services/gateway/vars/NETWORK"
 _blockchain="eth"
 _network="mainnet"
-_timeout=3
+_timeout=1
 if [ -f "$_blockchain_f" ]; then
 	_blockchain=$(cat $_blockchain_f)
 fi
