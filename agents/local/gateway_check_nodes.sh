@@ -1,5 +1,16 @@
 #!/bin/bash
-_nodes=/massbit/massbitroute/app/src/sites/services/gateway/http.d/gw-dot-mainnet-nodes.conf
+_blockchain_f="/massbit/massbitroute/app/src/sites/services/gateway/vars/BLOCKCHAIN"
+_network_f="/massbit/massbitroute/app/src/sites/services/gateway/vars/NETWORK"
+_blockchain="eth"
+_network="mainnet"
+if [ -f "$_blockchain_f" ]; then
+	_blockchain=$(cat $_blockchain_f)
+fi
+if [ -f "$_network_f" ]; then
+	_network=$(cat $_network_f)
+fi
+
+_nodes=/massbit/massbitroute/app/src/sites/services/gateway/http.d/gw-${_blockchain}-${_network}-nodes.conf
 check_http="/usr/lib/nagios/plugins/check_http"
 _http() {
 	_hostname=$1
@@ -31,10 +42,8 @@ if [ -f "$_nodes" ]; then
 		exit 0
 	fi
 
-	_blockchain="/massbit/massbitroute/app/src/sites/services/gateway/vars/BLOCKCHAIN"
-
 	tmp=$(mktemp)
-	awk -f /massbit/massbitroute/app/src/sites/services/mkagent/agents/extract_nodes.awk /massbit/massbitroute/app/src/sites/services/gateway/http.d/gw-dot-mainnet-nodes.conf | while read _token _domain _url; do
+	awk -f /massbit/massbitroute/app/src/sites/services/mkagent/agents/extract_nodes.awk $_nodes | while read _token _domain _url; do
 		_path="/"
 		_ip=$(echo $_url | cut -d'/' -f3)
 		_port=443
