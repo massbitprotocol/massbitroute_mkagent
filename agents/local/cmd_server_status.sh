@@ -9,5 +9,5 @@ st=0
 if [ $? -ne 0 ]; then
 	st=2
 fi
-echo "$st mbr-cmd_server $n $(cat ${tmp}.1)"
+echo "$st mbr-cmd_server - n=$n $(cat ${tmp}.1)"
 rm $tmp*
