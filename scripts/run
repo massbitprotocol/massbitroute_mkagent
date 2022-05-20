@@ -3,7 +3,7 @@ SITE_ROOT=$(realpath $(dirname $(realpath $0))/..)
 pip="pip install "
 cd $SITE_ROOT
 _prepare() {
-	apt install -y monitoring-plugins python3 python3-pip parallel netcat
+	apt install -y monitoring-plugins python3 python3-pip parallel netcat dmidecode
 	$pip --upgrade pip
 	$pip -r $SITE_ROOT/agents/requirements.txt
 }
