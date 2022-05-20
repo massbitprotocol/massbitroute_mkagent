@@ -10,7 +10,8 @@ if [ $cache -ne 1 ]; then
 fi
 
 curl="/usr/bin/curl -sk"
-ip=$($curl https://internal.monitor.mbr.massbitroute.net/__my/ip)
+#ip=$($curl https://internal.monitor.mbr.massbitroute.net/__my/ip)
+ip=$($curl http://ipv4.icanhazip.com)
 is_open=$($curl https://internal.monitor.mbr.massbitroute.net/__check/port/$ip/tcp/443)
 if [ $is_open -eq 0 ]; then
 	echo $is_open mbr-firewall-443 - "Port 443 is open" >$cache_file
