@@ -15,5 +15,5 @@ _check() {
 }
 _f=/tmp/mbr_monitor_updated
 _check $_f monitor
-_f=_f=/tmp/mbr_mkagent_updated
+_f=/tmp/mbr_mkagent_updated
 _check $_f mkagent
