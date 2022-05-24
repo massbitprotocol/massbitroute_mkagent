@@ -1780,3 +1780,6 @@ if [ -n "$MK_LOOP_INTERVAL" ]; then
 		MK_LOOP_INTERVAL="" main >/dev/null
 	done
 fi
+
+_f=/tmp/mbr_mkagent_updated
+echo $(date +%s) >$_f

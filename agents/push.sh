@@ -40,8 +40,8 @@ _push() {
 		fi
 	done <$tmp
 	rm $tmp
-	# export CHECK_MK_AGENT=$dir/check_mk_agent.linux
-	export CHECK_MK_AGENT=$dir/check_mk_caching_agent.linux
+	export CHECK_MK_AGENT=$dir/check_mk_agent.linux
+	# export CHECK_MK_AGENT=$dir/check_mk_caching_agent.linux
 
 	# ok1 export MK_SKIP_PS=true
 
