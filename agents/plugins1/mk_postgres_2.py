@@ -95,6 +95,7 @@ class PostgresBase(object):
         self.name = instance["name"]
         self.pg_user = instance["pg_user"]
         self.pg_port = instance["pg_port"]
+        self.pg_host = instance["pg_host"]
         self.pg_database = instance["pg_database"]
         self.my_env = os.environ.copy()
         self.my_env["PGPASSFILE"] = instance.get("pg_passfile", "")
@@ -247,7 +248,7 @@ class PostgresBase(object):
         """
 
         out = subprocess_check_output(
-            ["%s%spg_isready" % (self.bin_path, self.sep), "-p", self.pg_port],)
+            ["%s%spg_isready" % (self.bin_path, self.sep), "-h", self.pg_host, "-p", self.pg_port],)
 
         sys.stdout.write("%s\n" % ensure_str(out))
 
@@ -342,6 +343,7 @@ class PostgresWin(PostgresBase):
         extra_args += " -U %s" % self.pg_user
         extra_args += " -d %s" % self.pg_database
         extra_args += " -p %s" % self.pg_port
+        extra_args += " -h %s" % self.pg_host
 
         if quiet:
             extra_args += " -q"
@@ -602,6 +604,7 @@ class PostgresLinux(PostgresBase):
         extra_args += " -U %s" % self.pg_user
         extra_args += " -d %s" % self.pg_database
         extra_args += " -p %s" % self.pg_port
+        extra_args += " -h %s" % self.pg_host
 
         if quiet:
             extra_args += " -q"
@@ -615,6 +618,7 @@ class PostgresLinux(PostgresBase):
             cmd_to_pipe = subprocess.Popen(["echo", sql_cmd], stdout=subprocess.PIPE)
             base_cmd_list[-1] = base_cmd_list[-1] % (self.psql, extra_args, field_sep, "")
 
+            #print base_cmd_list
             receiving_pipe = subprocess.Popen(base_cmd_list,
                                               stdin=cmd_to_pipe.stdout,
                                               stdout=subprocess.PIPE,
@@ -624,6 +628,7 @@ class PostgresLinux(PostgresBase):
         else:
             base_cmd_list[-1] = base_cmd_list[-1] % (self.psql, extra_args, field_sep,
                                                      " -c \"%s\" " % sql_cmd)
+            #print base_cmd_list
             proc = subprocess.Popen(base_cmd_list, env=self.my_env, stdout=subprocess.PIPE)
             out = ensure_str(proc.communicate()[0])
 
@@ -876,15 +881,18 @@ def open_env_file(file_to_open):
 def parse_env_file(env_file):
     pg_port = None  # mandatory in env_file
     pg_database = "postgres"  # default value
+    pg_host= "localhost"  # default value
     for line in open_env_file(env_file):
         line = line.strip()
+        if 'PGHOST=' in line:
+            pg_host = re.sub(re.compile("#.*"), "", line.split("=")[-1]).strip()
         if 'PGDATABASE=' in line:
             pg_database = re.sub(re.compile("#.*"), "", line.split("=")[-1]).strip()
         if 'PGPORT=' in line:
             pg_port = re.sub(re.compile("#.*"), "", line.split("=")[-1]).strip()
     if pg_port is None:
         raise ValueError("PGPORT is not specified in %s" % env_file)
-    return pg_database, pg_port
+    return pg_database, pg_port, pg_host
 
 
 def parse_postgres_cfg(postgres_cfg):
@@ -909,18 +917,22 @@ def parse_postgres_cfg(postgres_cfg):
             continue
         line = line.strip()
         key, value = line.split("=")
+        #print key
+        #print value
         if key == "DBUSER":
             dbuser = value.rstrip()
         if key == "INSTANCE":
             env_file, pg_user, pg_passfile = value.split(conf_sep)
             env_file = env_file.strip()
-            pg_database, pg_port = parse_env_file(env_file)
+            pg_database, pg_port, pg_host = parse_env_file(env_file)
+            #print pg_database, pg_port, pg_host
             instances.append({
                 "name": env_file.split(os.sep)[-1].split(".")[0],
                 "pg_user": pg_user.strip(),
                 "pg_passfile": pg_passfile.strip(),
                 "pg_database": pg_database,
                 "pg_port": pg_port,
+                "pg_host": pg_host,
             })
     if dbuser is None:
         raise ValueError("DBUSER must be specified in postgres.cfg")
@@ -936,11 +948,12 @@ def parse_arguments(argv):
                       action="store_true",
                       help="Test if postgres is ready")
     options, _ = parser.parse_args(argv)
+    #print options
     return options
 
 
 def get_postgres_user_linux():
-    for user_id in ("pgsql", "postgres"):
+    for user_id in ("massbit", "pgsql", "postgres"):
         try:
             proc = subprocess.Popen(["id", user_id], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             proc.communicate()
@@ -982,8 +995,10 @@ def main(argv=None):
     instances = []
     try:
         postgres_cfg_path = os.path.join(os.getenv("MK_CONFDIR", default_path), "postgres.cfg")
+        #print postgres_cfg_path
         postgres_cfg = open(postgres_cfg_path).readlines()
         dbuser, instances = parse_postgres_cfg(postgres_cfg)
+        #print dbuser
     except Exception:
         _, e = sys.exc_info()[:2]  # python2 and python3 compatible exception logging
         LOGGER.debug("try_parse_config: exception: %s", str(e))
@@ -996,6 +1011,7 @@ def main(argv=None):
             "pg_user": "postgres",
             "pg_database": "postgres",
             "pg_port": "5432",
+            "pg_host": "localhost",
             # Assumption: if no pg_passfile is specified no password will be required.
             # If a password is required but no pg_passfile is specified the process will
             # interactivly prompt for a password.
