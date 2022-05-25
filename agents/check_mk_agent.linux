@@ -12,11 +12,13 @@ export MK_RUN_SYNC_PARTS
 # Make sure that locally installed binaries are found
 PATH=$PATH:/usr/local/bin
 
+mkdir -p /var/lib/check_mk_agent
+export MK_LIBDIR=/massbit/massbitroute/app/src/sites/services/mkagent/agents
+export MK_CONFDIR=$MK_LIBDIR/cfg
 export MK_LIBDIR=${MK_LIBDIR:-/usr/lib/check_mk_agent}
 export MK_CONFDIR=${MK_CONFDIR:-/etc/check_mk}
 export MK_VARDIR=${MK_VARDIR:-/var/lib/check_mk_agent}
-export MK_LIBDIR=/home/massbit/bin/check_mk/agents
-export MK_CONFDIR=/home/massbit/bin/check_mk/agents/cfg
+
 # Optionally set a tempdir for all subsequent calls
 #export TMPDIR=
 
@@ -43,8 +45,7 @@ PLUGINSDIR=$MK_LIBDIR/plugins
 # All executables in LOCALDIR will by executabled and their
 # output inserted into the section <<<local>>>. Please
 # refer to online documentation for details about local checks.
-LOCALDIR=/massbit/massbitroute/app/src/sites/services/mkagent/agents/local
-#${LOCALDIR:-$MK_LIBDIR/local}
+LOCALDIR=${LOCALDIR:-$MK_LIBDIR/local}
 
 # All files in SPOOLDIR will simply appended to the agent
 # output if they are not outdated (see below)
