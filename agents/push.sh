@@ -5,13 +5,10 @@ SITE_ROOT=$1
 if [ -z "$SITE_ROOT" ]; then exit 0; fi
 
 shift
-# if [ "$SITE_ROOT" == "_kill" ]; then
-# 	pkill -f push.py
-# 	exit 0
-# elif [ "$SITE_ROOT" == "_update_local_check" ]; then
-# 	_update_local_check
-# 	exit 0
-# fi
+if [ "$SITE_ROOT" == "_kill" ]; then
+	pkill -f push.py
+	exit 0
+fi
 
 source $SITE_ROOT/.env_raw
 export PORTAL_DOMAIN=portal.$DOMAIN
