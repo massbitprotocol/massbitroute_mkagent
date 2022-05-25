@@ -1,0 +1,155 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# Copyright (C) 2019 tribe29 GmbH - License: GNU General Public License v2
+# This file is part of Checkmk (https://checkmk.com). It is subject to the terms and
+# conditions defined in the file COPYING, which is part of this source code package.
+
+# type: ignore[import]
+
+import argparse
+import logging
+import time
+import socket
+from getpass import getpass
+
+import cmk.utils.render
+
+from cmk.utils.mailbox import (
+    CheckResult,
+    active_check_main,
+    Args,
+    Mailbox,
+)
+
+
+def create_argument_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--warn-age-oldest",
+        type=int,
+        help="warn if the oldest message is older than this value (in seconds)",
+    )
+    parser.add_argument(
+        "--crit-age-oldest",
+        type=int,
+        help="crit if the oldest message is older than this value (in seconds)",
+    )
+
+    parser.add_argument(
+        "--warn-age-newest",
+        type=int,
+        help="warn if the newest message is older than this value (in seconds)",
+    )
+    parser.add_argument(
+        "--crit-age-newest",
+        type=int,
+        help="crit if the newest message is older than this value (in seconds)",
+    )
+
+    parser.add_argument(
+        "--warn-count",
+        type=int,
+        help="number of mails above which the check will warn",
+    )
+    parser.add_argument(
+        "--crit-count",
+        type=int,
+        help="number of mails above which the check will become critical",
+    )
+
+    parser.add_argument(
+        "--mailbox",
+        type=str,
+        nargs="+",
+        help="mailbox to check. Can appear repeatedly to monitor multiple mailboxes",
+    )
+
+    parser.add_argument(
+        "--retrieve-max",
+        metavar="COUNT",
+        type=int,
+        help="limit the number of mails retrieved per mailbox. Only relevant when checking age",
+    )
+    return parser
+
+
+def check_mailboxes(args: Args) -> CheckResult:
+    args.fetch_password = args.fetch_password or getpass()
+    if args.fetch_protocol == "POP3":
+        raise RuntimeError("check_mailboxes does not operate on POP servers, sorry.")
+    socket.setdefaulttimeout(args.connect_timeout)
+    status_icon = {0: "", 1: "(!) ", 2: "(!!) "}
+    messages = []
+    now = time.time()
+
+    with Mailbox(args) as mailbox:
+        logging.info("connect..")
+        mailbox.connect()
+
+        logging.info("connected, fetch mailbox folders..")
+        available_mailboxes = mailbox.folders()
+
+        logging.debug("Found %d mailbox folders", len(available_mailboxes))
+        logging.debug("Mailboxes to check: %r", args.mailbox)
+        if args.mailbox and any(folder not in available_mailboxes for folder in args.mailbox):
+            return (
+                3,
+                "Some mailbox names are not available: %r" %
+                (set(args.mailbox) - set(available_mailboxes)),
+                [],
+            )
+
+        for i, folder in enumerate(args.mailbox or available_mailboxes):
+            logging.debug("Check folder %r (%d/%d)", folder, i, len(available_mailboxes))
+            mail_count = mailbox.select_folder(folder)
+            logging.debug("%d mails", mail_count)
+
+            if args.crit_count and args.warn_count and mail_count >= args.warn_count:
+                messages.append((
+                    2 if mail_count >= args.crit_count else 1,
+                    "%r has %d messages (warn/crit at %d/%d)" %
+                    (folder, mail_count, args.warn_count, args.crit_count),
+                ))
+
+            if args.crit_age_oldest and args.warn_age_oldest:
+                old_mails = sorted(mailbox.mails_by_date(before=now - args.warn_age_oldest))
+                if old_mails:
+                    oldest = now - old_mails[0]
+                    status = 2 if oldest >= args.crit_age_oldest else 1 if oldest >= args.warn_age_oldest else 0
+                    if status > 0:
+                        messages.append(
+                            (status,
+                             "oldest mail in %r is at least %s old %s(warn/crit at %s/%s)" % (
+                                 folder,
+                                 cmk.utils.render.Age(oldest),
+                                 status_icon[status],
+                                 cmk.utils.render.Age(args.warn_age_oldest),
+                                 cmk.utils.render.Age(args.crit_age_oldest),
+                             )))
+
+            if args.crit_age_newest and args.warn_age_newest:
+                new_mails = sorted(mailbox.mails_by_date(after=(now - args.crit_age_newest)))
+                # crit per default in case there are no new mails
+                status, newest = 2, args.crit_age_newest
+                if new_mails:
+                    newest = now - new_mails[-1]
+                    status = 2 if newest >= args.crit_age_newest else 1 if newest >= args.warn_age_newest else 0
+                if status > 0:
+                    messages.append(
+                        (status, "newest mail in %r is at least %s old %s(warn/crit at %s/%s)" % (
+                            folder,
+                            cmk.utils.render.Age(newest),
+                            status_icon[status],
+                            cmk.utils.render.Age(args.warn_age_newest),
+                            cmk.utils.render.Age(args.crit_age_newest),
+                        )))
+
+        if messages:
+            return max(m[0] for m in messages), ", ".join([m[1] for m in messages]), None
+
+        return 0, "all mailboxes fine", None
+
+
+if __name__ == "__main__":
+    logging.getLogger().name = "check_mailboxes"
+    active_check_main(create_argument_parser(), check_mailboxes)
