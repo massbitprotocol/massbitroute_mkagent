@@ -58,13 +58,13 @@ if [ -f "$_nodes" ]; then
 	fi
 
 	tmp=$(mktemp)
-	awk -f /massbit/massbitroute/app/src/sites/services/mkagent/agents/extract_nodes.awk $_nodes | while read _token _domain _url; do
-		_path="/"
-		_ip=$(echo $_url | cut -d'/' -f3)
-		_port=443
-		_http $_domain $_ip $_port $_path $_token $_blockchain >>$tmp
+	# awk -f /massbit/massbitroute/app/src/sites/services/mkagent/agents/extract_nodes.awk $_nodes | while read _token _domain _url; do
+	# 	_path="/"
+	# 	_ip=$(echo $_url | cut -d'/' -f3)
+	# 	_port=443
+	# 	_http $_domain $_ip $_port $_path $_token $_blockchain >>$tmp
 
-	done
+	# done
 
 	_listid=listid-${_blockchain}-${_network}-1-1
 	curl -skL https://portal.$DOMAIN/deploy/info/node/$_listid >/tmp/$_listid
