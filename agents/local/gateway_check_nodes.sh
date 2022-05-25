@@ -64,7 +64,10 @@ if [ -f "$_nodes" ]; then
 
 	done
 	>/tmp/test
-	curl -skL https://portal.$DOMAIN/deploy/info/node/listid-${_blockchain}-${_network}-${_continent}-${_country}-1-1 | while read _id _user _block _net _ip _continent _country _token _status _approve _remain; do
+	_listid=listid-${_blockchain}-${_network}-${_continent}-${_country}-1-1
+	curl -skL https://portal.$DOMAIN/deploy/info/node/$_listid >/tmp/$_listid
+	echo >>/tmp/$_listid
+	cat /tmp/$_listid | while read _id _user _block _net _ip _continent _country _token _status _approve _remain; do
 		_path="/"
 		_port=443
 		_domain="$_id.node.mbr.$DOMAIN"
