@@ -65,24 +65,42 @@ if [ -f "$_nodes" ]; then
 		_http $_domain $_ip $_port $_path $_token $_blockchain >>$tmp
 
 	done
+
+	tmpd=$(mktemp -d)
 	>/tmp/test
-	_listid=listid-${_blockchain}-${_network}-${_continent}-${_country}-1-1
+	# _listid=listid-${_blockchain}-${_network}-${_continent}-${_country}-1-1
+	# curl -skL https://portal.$DOMAIN/deploy/info/node/$_listid >/tmp/$_listid
+	# echo >>/tmp/$_listid
+	# cat /tmp/$_listid | while read _id _user _block _net _ip _continent _country _token _status _approve _remain; do
+	# 	if [ -f "$tmpd/$_id" ]; then continue; fi
+	# 	touch $tmpd/$_id
+	# 	_path="/"
+	# 	_port=443
+	# 	_domain="$_id.node.mbr.$DOMAIN"
+	# 	_http $_domain $_ip $_port $_path $_token $_blockchain mbr-node-${_continent}-${_country}-$_id >>/tmp/test
+
+	# done
+	# _listid=listid-${_blockchain}-${_network}-${_continent}-1-1
+	# curl -skL https://portal.$DOMAIN/deploy/info/node/$_listid >/tmp/$_listid
+	# echo >>/tmp/$_listid
+	# cat /tmp/$_listid | while read _id _user _block _net _ip _continent _country _token _status _approve _remain; do
+	# 	if [ -f "$tmpd/$_id" ]; then continue; fi
+	# 	touch $tmpd/$_id
+	# 	_path="/"
+	# 	_port=443
+	# 	_domain="$_id.node.mbr.$DOMAIN"
+	# 	_http $_domain $_ip $_port $_path $_token $_blockchain mbr-node-${_continent}-$_id >>/tmp/test
+	# done
+	_listid=listid-${_blockchain}-${_network}-1-1
 	curl -skL https://portal.$DOMAIN/deploy/info/node/$_listid >/tmp/$_listid
 	echo >>/tmp/$_listid
 	cat /tmp/$_listid | while read _id _user _block _net _ip _continent _country _token _status _approve _remain; do
+		if [ -f "$tmpd/$_id" ]; then continue; fi
+		touch $tmpd/$_id
 		_path="/"
 		_port=443
 		_domain="$_id.node.mbr.$DOMAIN"
 		_http $_domain $_ip $_port $_path $_token $_blockchain mbr-node-${_continent}-${_country}-$_id >>/tmp/test
-	done
-	_listid=listid-${_blockchain}-${_network}-${_continent}-1-1
-	curl -skL https://portal.$DOMAIN/deploy/info/node/$_listid >/tmp/$_listid
-	echo >>/tmp/$_listid
-	cat /tmp/$_listid | while read _id _user _block _net _ip _continent _country _token _status _approve _remain; do
-		_path="/"
-		_port=443
-		_domain="$_id.node.mbr.$DOMAIN"
-		_http $_domain $_ip $_port $_path $_token $_blockchain mbr-node-${_continent}-$_id >>/tmp/test
 	done
 
 	mv $tmp /tmp/gateway_check_nodes
