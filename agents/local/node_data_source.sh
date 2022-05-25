@@ -2,7 +2,7 @@
 check_http="/usr/lib/nagios/plugins/check_http"
 _timeout=3
 type=$(supervisorctl status | awk '/mbr_(gateway|node) /{print $1}')
-if [ "$type" != "mbr_gateway" ]; then
+if [ "$type" != "mbr_node" ]; then
 	exit 0
 fi
 
