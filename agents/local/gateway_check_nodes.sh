@@ -5,6 +5,9 @@ if [ "$type" != "mbr_gateway" ]; then
 fi
 _blockchain_f="/massbit/massbitroute/app/src/sites/services/gateway/vars/BLOCKCHAIN"
 _network_f="/massbit/massbitroute/app/src/sites/services/gateway/vars/NETWORK"
+_raw_f="/massbit/massbitroute/app/src/sites/services/gateway/vars/RAW"
+_env="/massbit/massbitroute/app/src/sites/services/gateway/.env_raw"
+if [ -f "$_env" ]; then source $_env; fi
 _blockchain="eth"
 _network="mainnet"
 _timeout=3
@@ -13,6 +16,11 @@ if [ -f "$_blockchain_f" ]; then
 fi
 if [ -f "$_network_f" ]; then
 	_network=$(cat $_network_f)
+fi
+
+if [ -f "$_raw_f" ]; then
+	_country=$(cat $_raw_f | jq .geo.countryCode | sed 's/\"//g')
+	_continent=$(cat $_raw_f | jq .geo.continentCode | sed 's/\"//g')
 fi
 
 _nodes=/massbit/massbitroute/app/src/sites/services/gateway/http.d/gw-${_blockchain}-${_network}-nodes.conf
@@ -55,5 +63,13 @@ if [ -f "$_nodes" ]; then
 		_http $_domain $_ip $_port $_path $_token $_blockchain >>$tmp
 
 	done
+	>/tmp/test
+	curl -skL https://portal.$DOMAIN/deploy/info/node/listid-${_blockchain}-${_network}-${_continent}-${_country}-1-1 | while read _id _user _block _net _ip _continent _country _token _status _approve _remain; do
+		_path="/"
+		_port=443
+		_domain="$_id.node.mbr.$DOMAIN"
+		_http $_domain $_ip $_port $_path $_token $_blockchain >>/tmp/test
+	done
+
 	mv $tmp /tmp/gateway_check_nodes
 fi
