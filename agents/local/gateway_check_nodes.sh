@@ -66,7 +66,7 @@ if [ -f "$_nodes" ]; then
 
 	done
 
-	tmpd=$(mktemp -d)
+	# tmpd=$(mktemp -d)
 	>/tmp/test
 	# _listid=listid-${_blockchain}-${_network}-${_continent}-${_country}-1-1
 	# curl -skL https://portal.$DOMAIN/deploy/info/node/$_listid >/tmp/$_listid
@@ -95,8 +95,8 @@ if [ -f "$_nodes" ]; then
 	curl -skL https://portal.$DOMAIN/deploy/info/node/$_listid >/tmp/$_listid
 	echo >>/tmp/$_listid
 	cat /tmp/$_listid | while read _id _user _block _net _ip _continent _country _token _status _approve _remain; do
-		if [ -f "$tmpd/$_id" ]; then continue; fi
-		touch $tmpd/$_id
+		# if [ -f "$tmpd/$_id" ]; then continue; fi
+		# touch $tmpd/$_id
 		_path="/"
 		_port=443
 		_domain="$_id.node.mbr.$DOMAIN"
