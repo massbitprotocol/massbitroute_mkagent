@@ -63,7 +63,7 @@ if [ $cache -ne 1 ]; then
 fi
 
 tmp=$(mktemp)
-for _ss in 0-1 1-0 1-1; do
+for _ss in 0-1 1-1; do
 	_listid=listid-${_blockchain}-${_network}-$_ss
 	curl -skL https://portal.$DOMAIN/deploy/info/gateway/$_listid >/tmp/$_listid
 	echo >>/tmp/$_listid
