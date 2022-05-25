@@ -1,12 +1,14 @@
 #!/bin/bash
-type=$(supervisorctl status | awk '/mbr_(gateway|node) /{print $1}')
-if [ "$type" != "mbr_gateway" ]; then
+type=$(supervisorctl status | awk '/mbr_(gateway|node) /{sub(/^mbr_/,"",$1);print $1}')
+if [ "$type" != "gateway" ]; then
 	exit 0
 fi
-_blockchain_f="/massbit/massbitroute/app/src/sites/services/gateway/vars/BLOCKCHAIN"
-_network_f="/massbit/massbitroute/app/src/sites/services/gateway/vars/NETWORK"
-_raw_f="/massbit/massbitroute/app/src/sites/services/gateway/vars/RAW"
-_env="/massbit/massbitroute/app/src/sites/services/gateway/.env_raw"
+
+_cache_f=/tmp/gateway_check_nodes
+_blockchain_f="/massbit/massbitroute/app/src/sites/services/$type/vars/BLOCKCHAIN"
+_network_f="/massbit/massbitroute/app/src/sites/services/$type/vars/NETWORK"
+_raw_f="/massbit/massbitroute/app/src/sites/services/$type/vars/RAW"
+_env="/massbit/massbitroute/app/src/sites/services/$type/.env_raw"
 if [ -f "$_env" ]; then source $_env; fi
 _blockchain="eth"
 _network="mainnet"
@@ -23,7 +25,6 @@ if [ -f "$_raw_f" ]; then
 	_continent=$(cat $_raw_f | jq .geo.continentCode | sed 's/\"//g')
 fi
 
-_nodes=/massbit/massbitroute/app/src/sites/services/gateway/http.d/gw-${_blockchain}-${_network}-nodes.conf
 check_http="/usr/lib/nagios/plugins/check_http"
 _http() {
 	_hostname=$1
@@ -46,35 +47,25 @@ _http() {
 	fi
 
 }
-if [ -f "$_nodes" ]; then
-	cache=$1
-	if [ -z "$cache" ]; then cache=0; fi
-	if [ $cache -ne 1 ]; then
-		if [ -f "/tmp/gateway_check_nodes" ]; then
-			cat /tmp/gateway_check_nodes
-		fi
-
-		exit 0
+cache=$1
+if [ -z "$cache" ]; then cache=0; fi
+if [ $cache -ne 1 ]; then
+	if [ -f "$_cache_f" ]; then
+		cat $_cache_f
 	fi
 
-	tmp=$(mktemp)
-	# awk -f /massbit/massbitroute/app/src/sites/services/mkagent/agents/extract_nodes.awk $_nodes | while read _token _domain _url; do
-	# 	_path="/"
-	# 	_ip=$(echo $_url | cut -d'/' -f3)
-	# 	_port=443
-	# 	_http $_domain $_ip $_port $_path $_token $_blockchain >>$tmp
-
-	# done
-
-	_listid=listid-${_blockchain}-${_network}-1-1
-	curl -skL https://portal.$DOMAIN/deploy/info/node/$_listid >/tmp/$_listid
-	echo >>/tmp/$_listid
-	cat /tmp/$_listid | while read _id _user _block _net _ip _continent _country _token _status _approve _remain; do
-		_path="/"
-		_port=443
-		_domain="$_id.node.mbr.$DOMAIN"
-		_http $_domain $_ip $_port $_path $_token $_blockchain mbr-node-${_continent}-${_country}-$_id >>$tmp
-	done
-
-	mv $tmp /tmp/gateway_check_nodes
+	exit 0
 fi
+
+tmp=$(mktemp)
+_listid=listid-${_blockchain}-${_network}-1-1
+curl -skL https://portal.$DOMAIN/deploy/info/node/$_listid >/tmp/$_listid
+echo >>/tmp/$_listid
+cat /tmp/$_listid | while read _id _user _block _net _ip _continent _country _token _status _approve _remain; do
+	_path="/"
+	_port=443
+	_domain="$_id.node.mbr.$DOMAIN"
+	_http $_domain $_ip $_port $_path $_token $_blockchain mbr-node-${_continent}-${_country}-$_id >>$tmp
+done
+
+mv $tmp $_cache_f
