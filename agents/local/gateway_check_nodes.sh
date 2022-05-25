@@ -1,4 +1,8 @@
 #!/bin/bash
+type=$(supervisorctl status | awk '/mbr_(gateway|node) /{print $1}')
+if [ "$type" != "mbr_gateway" ]; then
+	exit 0
+fi
 _blockchain_f="/massbit/massbitroute/app/src/sites/services/gateway/vars/BLOCKCHAIN"
 _network_f="/massbit/massbitroute/app/src/sites/services/gateway/vars/NETWORK"
 _blockchain="eth"
