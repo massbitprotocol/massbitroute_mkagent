@@ -33,8 +33,10 @@ _http() {
 	_path=$4
 	_token=$5
 	_blockchain=$6
-
-	_checkname="mbr-node-$_id"
+	_checkname=$7
+	if [ -z "$_checkname" ]; then
+		_checkname="mbr-node-$_id"
+	fi
 	if [ "$_blockchain" == "dot" ]; then
 		$check_http -H $_hostname -k "x-api-key: $_token" -u $_path -T application/json --method=POST --post='{"jsonrpc":"2.0","method":"chain_getBlock","params": [],"id": 1}' -t $_timeout --ssl -p $_port | tail -1 |
 			awk -F'|' -v checkname=$_checkname '{st=0;perf="-";if(index($1,"CRITICAL") != 0){st=2} else if(index($1,"WARNING") != 0){st=1} else {gsub(/ /,"|",$2);perf=$2;};print st,checkname,perf,$1}'
@@ -71,7 +73,7 @@ if [ -f "$_nodes" ]; then
 		_path="/"
 		_port=443
 		_domain="$_id.node.mbr.$DOMAIN"
-		_http $_domain $_ip $_port $_path $_token $_blockchain >>/tmp/test
+		_http $_domain $_ip $_port $_path $_token $_blockchain mbr-node-${_status}-${_approve}-$_id >>/tmp/test
 	done
 
 	mv $tmp /tmp/gateway_check_nodes
