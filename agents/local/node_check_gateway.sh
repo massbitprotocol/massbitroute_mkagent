@@ -4,7 +4,7 @@ if [ "$type" != "node" ]; then
 	exit 0
 fi
 _cache_f=/tmp/node_check_gateway
-_node_id="/massbit/massbitroute/app/src/sites/services/$type/vars/ID"
+_node_id_f="/massbit/massbitroute/app/src/sites/services/$type/vars/ID"
 _blockchain_f="/massbit/massbitroute/app/src/sites/services/$type/vars/BLOCKCHAIN"
 _network_f="/massbit/massbitroute/app/src/sites/services/$type/vars/NETWORK"
 _raw_f="/massbit/massbitroute/app/src/sites/services/$type/vars/RAW"
@@ -16,6 +16,11 @@ _timeout=3
 if [ -f "$_blockchain_f" ]; then
 	_blockchain=$(cat $_blockchain_f)
 fi
+
+if [ -f "$_node_id_f" ]; then
+	_node_id=$(cat $_node_id_f)
+fi
+
 if [ -f "$_network_f" ]; then
 	_network=$(cat $_network_f)
 fi
@@ -65,7 +70,7 @@ cat /tmp/$_listid | while read _id _user _block _net _ip _continent _country _to
 	_path="/_node/$_node_id/"
 	_port=443
 	_domain="$_id.gw.mbr.$DOMAIN"
-	_http $_domain $_ip $_port $_path $_token $_blockchain mbr-node-${_continent}-${_country}-$_id >>$tmp
+	_http $_domain $_ip $_port $_path $_token $_blockchain mbr-gateway-${_continent}-${_country}-$_id >>$tmp
 done
 
 mv $tmp $_cache_f
