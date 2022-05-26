@@ -30,7 +30,7 @@ if [ -f "$_raw_f" ]; then
 	_country=$(cat $_raw_f | jq .geo.countryCode | sed 's/\"//g')
 	_continent=$(cat $_raw_f | jq .geo.continentCode | sed 's/\"//g')
 fi
-echo "0 node_info - id=$_node_id blockchain=$_blockchain network=$_network continent=$_continent country=$_country"
+echo "0 node_info - type=$type id=$_node_id blockchain=$_blockchain network=$_network continent=$_continent country=$_country"
 
 check_http="/usr/lib/nagios/plugins/check_http"
 _http() {
