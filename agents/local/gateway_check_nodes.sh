@@ -40,7 +40,7 @@ echo "0 node_info - type=$type ip=$_myip id=$_node_id blockchain=$_blockchain ne
 check_http="/usr/lib/nagios/plugins/check_http"
 _http() {
 	_hostname=$1
-	_hid=$(echo $_hostname | cut -d'.' -f1)
+	_id=$(echo $_hostname | cut -d'.' -f1)
 	_ip=$2
 	_port=$3
 	_path=$4
@@ -50,7 +50,7 @@ _http() {
 	_method=$8
 	if [ -z "$_method" ]; then _method=POST; fi
 	if [ -z "$_checkname" ]; then
-		_checkname="mbr-node-$_hid"
+		_checkname="mbr-node-$_id"
 	fi
 	if [ "$_method" == "POST" ]; then
 		if [ "$_blockchain" == "dot" ]; then
@@ -68,8 +68,8 @@ _http() {
 }
 _test_speed() {
 	_ip=$1
-	_sid=$2
-	wget --output-document=/dev/null --no-check-certificate https://$_ip/__log/128M 2>&1 | tail -2 | head -1 | awk -v id=$_sid '{sub(/\(/,"",$3);sub(/\)/,"",$4);print "0 mbr_node_speed_"id,"speed="$3,"speed is",$3,$4}'
+	_id=$2
+	wget --output-document=/dev/null --no-check-certificate https://$_ip/__log/128M 2>&1 | tail -2 | head -1 | awk -v id=$_id '{sub(/\(/,"",$3);sub(/\)/,"",$4);print "0 mbr_node_speed_"id,"speed="$3,"speed is",$3,$4}'
 }
 cache=$1
 if [ -z "$cache" ]; then cache=0; fi
