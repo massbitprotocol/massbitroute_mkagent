@@ -48,7 +48,6 @@ _http() {
 	_blockchain=$6
 	_checkname=$7
 	_method=$8
-	_post_data=""
 	if [ -z "$_method" ]; then _method=POST; fi
 	if [ -z "$_checkname" ]; then
 		_checkname="mbr-node-$_id"
