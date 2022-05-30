@@ -67,9 +67,12 @@ _http() {
 
 }
 _test_speed() {
+
 	_ip=$1
 	_id=$2
-	wget --output-document=/dev/null --no-check-certificate https://$_ip/__log/128M 2>&1 | tail -2 | head -1 | awk -v id=$_id '{sub(/\(/,"",$3);sub(/\)/,"",$4);print "0 mbr_node_speed_"id,"speed="$3,"speed is",$3,$4}'
+	_ff=/tmp/test_speed_$_id
+	if [ -f "$_ff" ]; then cat $_ff; fi
+	wget --output-document=/dev/null --no-check-certificate https://$_ip/__log/128M 2>&1 | tail -2 | head -1 | awk -v id=$_id '{sub(/\(/,"",$3);sub(/\)/,"",$4);print "0 mbr_node_speed_"id,"speed="$3,"speed is",$3,$4}' >$_ff
 }
 cache=$1
 if [ -z "$cache" ]; then cache=0; fi
