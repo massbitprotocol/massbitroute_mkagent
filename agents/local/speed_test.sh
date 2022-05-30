@@ -1,5 +1,5 @@
 #!/bin/bash
-
+_cache_f=/tmp/check_speed
 cache=$1
 if [ -z "$cache" ]; then cache=0; fi
 if [ $cache -ne 1 ]; then
@@ -9,7 +9,7 @@ if [ $cache -ne 1 ]; then
 
 	exit 0
 fi
-_cache_f=/tmp/check_speed
+
 if [ ! -f "/usr/bin/speedtest-cli" ]; then
 	apt install -y speedtest-cli
 fi
