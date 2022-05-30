@@ -40,7 +40,7 @@ echo "0 node_info - type=$type ip=$_myip id=$_node_id blockchain=$_blockchain ne
 check_http="/usr/lib/nagios/plugins/check_http"
 _http() {
 	_hostname=$1
-	_id=$(echo $_hostname | cut -d'.' -f1)
+	_idd=$(echo $_hostname | cut -d'.' -f1)
 	_ip=$2
 	_port=$3
 	_path=$4
@@ -50,7 +50,7 @@ _http() {
 	_method=$8
 	if [ -z "$_method" ]; then _method=POST; fi
 	if [ -z "$_checkname" ]; then
-		_checkname="mbr-node-$_id"
+		_checkname="mbr-node-$_idd"
 	fi
 	if [ "$_method" == "POST" ]; then
 		if [ "$_blockchain" == "dot" ]; then
