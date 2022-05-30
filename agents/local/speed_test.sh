@@ -9,7 +9,7 @@ if [ $cache -ne 1 ]; then
 
 	exit 0
 fi
-_cache_f=/tmp/gateway_check_speed
+_cache_f=/tmp/check_speed
 if [ ! -f "/usr/bin/speedtest-cli" ]; then
 	apt install -y speedtest-cli
 fi
