@@ -8,12 +8,13 @@
 
 export MK_RUN_ASYNC_PARTS
 export MK_RUN_SYNC_PARTS
+export MK_LIBDIR=/massbit/massbitroute/app/src/sites/services/mkagent/agents
 
 # Make sure that locally installed binaries are found
-PATH=$PATH:/usr/local/bin
+PATH=$PATH:/usr/local/bin:$MK_LIBDIR
 
 mkdir -p /var/lib/check_mk_agent
-export MK_LIBDIR=/massbit/massbitroute/app/src/sites/services/mkagent/agents
+
 export MK_CONFDIR=$MK_LIBDIR/cfg
 export MK_LIBDIR=${MK_LIBDIR:-/usr/lib/check_mk_agent}
 export MK_CONFDIR=${MK_CONFDIR:-/etc/check_mk}
