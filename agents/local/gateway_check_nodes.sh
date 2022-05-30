@@ -93,7 +93,7 @@ for _ss in 0-1 1-1; do
 		_domain="$_id.node.mbr.$DOMAIN"
 		_http $_domain $_ip $_port $_path $_token $_blockchain mbr-node-${_continent}-${_country}-$_id >>$tmp
 		_http $_ip $_ip $_port $_path_ping $_token $_blockchain mbr-node-${_continent}-${_country}-${_id}-ping GET >>$tmp
-		_test_speed $_ip $_id
+		_test_speed $_ip $_id >>$tmp
 
 	done
 
