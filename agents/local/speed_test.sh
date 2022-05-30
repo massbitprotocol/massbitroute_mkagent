@@ -1,0 +1,17 @@
+#!/bin/bash
+
+cache=$1
+if [ -z "$cache" ]; then cache=0; fi
+if [ $cache -ne 1 ]; then
+	if [ -f "$_cache_f" ]; then
+		cat $_cache_f
+	fi
+
+	exit 0
+fi
+_cache_f=/tmp/gateway_check_speed
+if [ ! -f "/usr/bin/speedtest-cli" ]; then
+	apt install -y speedtest-cli
+fi
+
+speedtest-cli --simple | awk '{v[$1]=$2;l=l" "$0}END{for(i in v){i1=i;sub(/:$/,"",i1);l1=i1"="v[i]"|"l1};sub(/\|$/,"",l1);print "0 mbr_speed",l1,l}' >$_cache_f
