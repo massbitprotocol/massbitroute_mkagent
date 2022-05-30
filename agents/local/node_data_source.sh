@@ -1,6 +1,7 @@
 #!/bin/bash
 check_http="/usr/lib/nagios/plugins/check_http"
 _timeout=3
+SITE_ROOT=/massbit/massbitroute/app/src/sites/services/node
 type=$(supervisorctl status | awk '/mbr_(gateway|node) /{print $1}')
 if [ "$type" != "mbr_node" ]; then
 	exit 0
@@ -10,9 +11,10 @@ if [ ! -f "$check_http" ]; then
 	apt install -y monitoring-plugins
 fi
 
-_data_uri_f="/massbit/massbitroute/app/src/sites/services/node/vars/DATA_URI"
+# _data_uri_f="/massbit/massbitroute/app/src/sites/services/node/vars/DATA_URI"
 
-if [ -f "$_data_uri_f" ]; then
+_data_uri=$(grep proxy_pass $SITE_ROOT/http.d/*.conf | tail -1 | awk '/proxy_pass/{sub(/;$/,"",$2);print $2}')
+if [ -n "$_data_uri" ]; then
 	_blockchain="/massbit/massbitroute/app/src/sites/services/node/vars/BLOCKCHAIN"
 	_network="/massbit/massbitroute/app/src/sites/services/node/vars/NETWORK"
 
@@ -22,7 +24,7 @@ if [ -f "$_data_uri_f" ]; then
 	# 	_continent=$(cat $_raw | jq .geo.continentCode | sed 's/\"//g')
 	# fi
 
-	_data_uri=$(cat $_data_uri_f | sed 's/ //g')
+	# _data_uri=$(cat $_data_uri_f | sed 's/ //g')
 	_scheme=$(echo $_data_uri | awk -F[/:] '{print $1}')
 	_ssl_opt=""
 
