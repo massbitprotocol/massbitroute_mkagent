@@ -82,7 +82,7 @@ val_wcdiff() {
 }
 
 get_speed() {
-	wget -b $url >/dev/null
+	wget --no-check-certificate -b $url >/dev/null
 	sleep $interval
 	BS="$(cat wget-log | tail -n20 | awk '{print $8}' | sed 's/K//' | awk '{sum+=$1};END{print sum}')"
 	speed=$(echo $BS / 19 | bc)
