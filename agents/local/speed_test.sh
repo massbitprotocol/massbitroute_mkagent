@@ -2,13 +2,13 @@
 _cache_f=/tmp/check_speed
 cache=$1
 if [ -z "$cache" ]; then cache=0; fi
-if [ $cache -ne 1 ]; then
-	if [ -f "$_cache_f" ]; then
-		cat $_cache_f
-	fi
-
+# if [ $cache -ne 1 ]; then
+if [ -f "$_cache_f" ]; then
+	cat $_cache_f
 	exit 0
 fi
+
+# fi
 
 if [ ! -f "/usr/bin/speedtest-cli" ]; then
 	apt install -y speedtest-cli
