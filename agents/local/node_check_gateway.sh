@@ -84,7 +84,7 @@ for _ss in 0-1 1-1; do
 	echo >>/tmp/$_listid
 	cat /tmp/$_listid | while read _id _user _block _net _ip _continent _country _token _status _approve _remain; do
 		_path="/_node/$_node_id/"
-		_path_ping="/_node/$_myip/_ping"
+		_path_ping="/_nodeip/$_myip/_ping"
 		_port=443
 		_domain="$_id.gw.mbr.$DOMAIN"
 		_http $_domain $_ip $_port $_path $_token $_blockchain mbr-gateway-${_continent}-${_country}-$_id >>$tmp
