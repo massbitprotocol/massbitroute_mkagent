@@ -3,7 +3,7 @@ type=$(supervisorctl status | awk '/mbr_(gateway|node) /{sub(/^mbr_/,"",$1);prin
 if [ "$type" != "gateway" ]; then
 	exit 0
 fi
-
+if [ ! -f "/usr/bin/wget" ]; then apt install -y wget; fi
 _cache_f=/tmp/gateway_check_nodes
 _node_id_f="/massbit/massbitroute/app/src/sites/services/$type/vars/ID"
 _ip_f="/massbit/massbitroute/app/src/sites/services/$type/vars/IP"
@@ -66,6 +66,11 @@ _http() {
 	fi
 
 }
+_test_speed() {
+	_ip=$1
+	_id=$2
+	wget --output-document=/dev/null --no-check-certificate https://$_ip/__log/128M 2>&1 | tail -2 | head -1 | awk -v id=$_id '{sub(/\(/,"",$3);sub(/\)/,"",$4);print "0 mbr_node_speed_"id,"speed="$3,"speed is",$3,$4}'
+}
 cache=$1
 if [ -z "$cache" ]; then cache=0; fi
 if [ $cache -ne 1 ]; then
@@ -88,7 +93,10 @@ for _ss in 0-1 1-1; do
 		_domain="$_id.node.mbr.$DOMAIN"
 		_http $_domain $_ip $_port $_path $_token $_blockchain mbr-node-${_continent}-${_country}-$_id >>$tmp
 		_http $_ip $_ip $_port $_path_ping $_token $_blockchain mbr-node-${_continent}-${_country}-${_id}-ping GET >>$tmp
+		_test_speed $_ip $_id
+
 	done
+
 done
 
 mv $tmp $_cache_f
