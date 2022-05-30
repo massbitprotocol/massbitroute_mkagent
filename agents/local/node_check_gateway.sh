@@ -15,7 +15,7 @@ _blockchain="eth"
 _network="mainnet"
 _timeout=3
 if [ -f "$_ip_f" ]; then
-	_ip=$(cat $_ip_f)
+	_myip=$(cat $_ip_f)
 fi
 
 if [ -f "$_blockchain_f" ]; then
@@ -35,7 +35,7 @@ if [ -f "$_raw_f" ]; then
 	_continent=$(cat $_raw_f | jq .geo.continentCode | sed 's/\"//g')
 fi
 
-echo "0 node_info - type=$type ip=$_ip id=$_node_id blockchain=$_blockchain network=$_network continent=$_continent country=$_country"
+echo "0 node_info - type=$type ip=$_myip id=$_node_id blockchain=$_blockchain network=$_network continent=$_continent country=$_country"
 
 check_http="/usr/lib/nagios/plugins/check_http"
 _http() {
@@ -47,14 +47,22 @@ _http() {
 	_token=$5
 	_blockchain=$6
 	_checkname=$7
+	_method=$8
+	_post_data=""
+	if [ -z "$_method" ]; then _method=POST; fi
 	if [ -z "$_checkname" ]; then
 		_checkname="mbr-node-$_id"
 	fi
-	if [ "$_blockchain" == "dot" ]; then
-		$check_http -H $_hostname -k "x-api-key: $_token" -u $_path -T application/json --method=POST --post='{"jsonrpc":"2.0","method":"chain_getBlock","params": [],"id": 1}' -t $_timeout --ssl -p $_port | tail -1 |
-			awk -F'|' -v checkname=$_checkname '{st=0;perf="-";if(index($1,"CRITICAL") != 0){st=2} else if(index($1,"WARNING") != 0){st=1} else {gsub(/ /,"|",$2);perf=$2;};print st,checkname,perf,$1}'
-	else
-		$check_http -H $_hostname -k "x-api-key: $_token" -u $_path -T application/json --method=POST --post='{"id": "blockNumber", "jsonrpc": "2.0", "method": "eth_getBlockByNumber", "params": ["latest", false]}' -t $_timeout --ssl -p $_port | tail -1 |
+	if [ "$_method" == "POST" ]; then
+		if [ "$_blockchain" == "dot" ]; then
+			$check_http -H $_hostname -k "x-api-key: $_token" -u $_path -T application/json --method=POST --post='{"jsonrpc":"2.0","method":"chain_getBlock","params": [],"id": 1}' -t $_timeout --ssl -p $_port | tail -1 |
+				awk -F'|' -v checkname=$_checkname '{st=0;perf="-";if(index($1,"CRITICAL") != 0){st=2} else if(index($1,"WARNING") != 0){st=1} else {gsub(/ /,"|",$2);perf=$2;};print st,checkname,perf,$1}'
+		else
+			$check_http -H $_hostname -k "x-api-key: $_token" -u $_path -T application/json --method=POST --post='{"id": "blockNumber", "jsonrpc": "2.0", "method": "eth_getBlockByNumber", "params": ["latest", false]}' -t $_timeout --ssl -p $_port | tail -1 |
+				awk -F'|' -v checkname=$_checkname '{st=0;perf="-";if(index($1,"CRITICAL") != 0){st=2} else if(index($1,"WARNING") != 0){st=1} else {gsub(/ /,"|",$2);perf=$2;};print st,checkname,perf,$1}'
+		fi
+	elif [ "$_method" == "GET" ]; then
+		$check_http -H $_hostname -k "x-api-key: $_token" -u $_path -T application/json --method=GET -t $_timeout --ssl -p $_port | tail -1 |
 			awk -F'|' -v checkname=$_checkname '{st=0;perf="-";if(index($1,"CRITICAL") != 0){st=2} else if(index($1,"WARNING") != 0){st=1} else {gsub(/ /,"|",$2);perf=$2;};print st,checkname,perf,$1}'
 	fi
 
@@ -76,9 +84,11 @@ for _ss in 0-1 1-1; do
 	echo >>/tmp/$_listid
 	cat /tmp/$_listid | while read _id _user _block _net _ip _continent _country _token _status _approve _remain; do
 		_path="/_node/$_node_id/"
+		_path_ping="/_node/$_myip/_ping"
 		_port=443
 		_domain="$_id.gw.mbr.$DOMAIN"
 		_http $_domain $_ip $_port $_path $_token $_blockchain mbr-gateway-${_continent}-${_country}-$_id >>$tmp
+		_http $_ip $_ip $_port $_path_ping $_token $_blockchain mbr-gateway-${_continent}-${_country}-${_id}-ping GET
 	done
 done
 
