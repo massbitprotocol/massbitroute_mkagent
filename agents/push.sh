@@ -22,7 +22,7 @@ _update_local_check() {
 		find $dir/local -type f -iname '*.sh' | while read cmd; do
 			bash $cmd 1 >>$log_local_check
 		done
-		sleep 30
+		sleep 10
 	done
 }
 _push() {
