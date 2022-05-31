@@ -15,11 +15,12 @@ export PORTAL_DOMAIN=portal.$DOMAIN
 
 cd $dir
 if [ ! -f "/usr/bin/parallel" ]; then apt install -y parallel; fi
-
+log_local_check=$SITE_ROOT/logs/local_check.log
+log_push=$SITE_ROOT/logs/monitor_push.log
 _update_local_check() {
 	while true; do
 		find $dir/local -type f -iname '*.sh' | while read cmd; do
-			bash $cmd 1
+			bash $cmd 1 >>$log_local_check
 		done
 		sleep 30
 	done
@@ -75,7 +76,7 @@ _push() {
 	export TOKEN=$(echo -n ${TK} | sha1sum | cut -d' ' -f1)
 
 	export PUSH_URL=push
-	/usr/bin/python3 push.py
+	/usr/bin/python3 push.py >>$log_push
 }
 if [ $# -eq 0 ]; then
 	(
