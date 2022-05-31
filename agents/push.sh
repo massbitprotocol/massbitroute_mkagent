@@ -25,18 +25,32 @@ _update_local_check() {
 	done
 }
 _push() {
-	tmp=$(mktemp)
-	curl -ksSfL https://$PORTAL_DOMAIN/deploy/info/hosts -o $tmp >/dev/nul
-	echo >>$tmp
-	while read _ip _host; do
-		if [ -z "$_ip" ]; then continue; fi
-		echo $_ip $_host
-		grep $_host /etc/hosts >/dev/null
-		if [ $? -ne 0 ]; then
-			echo $_ip $_host >>/etc/hosts
+
+	if [ ! -f "/etc/hosts.backup" ]; then
+		sed '/.mbr./d' /etc/hosts >/etc/hosts.backup
+	else
+		tmp=$(mktemp)
+		curl -ksSfL https://$PORTAL_DOMAIN/deploy/info/hosts -o $tmp >/dev/nul
+		if [ $? -eq 0 ]; then
+			cp /etc/hosts.backup ${tmp}.1
+			echo "#MBR hosts" >>${tmp}.1
+			grep '.mbr.' $tmp >>${tmp}.1
+			cp ${tmp}.1 /etc/hosts
+			rm ${tmp}*
 		fi
-	done <$tmp
-	rm $tmp
+	fi
+
+	# curl -ksSfL https://$PORTAL_DOMAIN/deploy/info/hosts -o $tmp >/dev/nul
+	# echo >>$tmp
+	# while read _ip _host; do
+	# 	if [ -z "$_ip" ]; then continue; fi
+	# 	echo $_ip $_host
+	# 	grep $_host /etc/hosts >/dev/null
+	# 	if [ $? -ne 0 ]; then
+	# 		echo $_ip $_host >>/etc/hosts
+	# 	fi
+	# done <$tmp
+	# rm $tmp
 	export CHECK_MK_AGENT=$dir/check_mk_agent.linux
 	# export CHECK_MK_AGENT=$dir/check_mk_caching_agent.linux
 
