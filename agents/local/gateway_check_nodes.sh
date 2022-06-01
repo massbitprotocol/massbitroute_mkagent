@@ -76,7 +76,7 @@ _test_speed() {
 		return
 	fi
 	tmp=$(mktemp)
-	wget --output-document=/dev/null --no-check-certificate https://$_ip/__log/128M >$tmp
+	wget --output-document=/dev/null --no-check-certificate https://$_ip/__log/128M 2>&1 >$tmp
 	cat $tmp
 	if [ $? -eq 0 ]; then
 		cat $tmp | tail -2 | head -1 | awk -v id=$_id '{sub(/\(/,"",$3);sub(/\)/,"",$4);print "0 mbr-node-speed-"id,"speed="$3,"speed is",$3,$4}' >$_ff
