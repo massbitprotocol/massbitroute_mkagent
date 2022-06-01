@@ -92,3 +92,5 @@ for _ss in 0-1 1-1; do
 done
 
 mv $tmp $_cache_f
+
+cat $_cache_f

@@ -1,5 +1,16 @@
 #!/bin/bash
 check_http="/usr/lib/nagios/plugins/check_http"
+_cache_f=/tmp/node_check_datasource
+cache=$1
+if [ -z "$cache" ]; then cache=0; fi
+if [ $cache -ne 1 ]; then
+	if [ -f "$_cache_f" ]; then
+		cat $_cache_f
+	fi
+
+	exit 0
+fi
+
 _timeout=3
 SITE_ROOT=/massbit/massbitroute/app/src/sites/services/node
 type=$(supervisorctl status | awk '/mbr_(gateway|node) /{print $1}')
@@ -52,11 +63,12 @@ if [ -n "$_data_uri" ]; then
 	_checkname="mbr-datasource-$_data_uri"
 	if [ "$_blockchain" == "dot" ]; then
 		$check_http -H $_hostname -u $_path -T application/json --method=POST --post='{"jsonrpc":"2.0","method":"chain_getBlock","params": [],"id": 1}' -t $_timeout $_ssl_opt $_port_opt | tail -1 |
-			awk -F'|' -v checkname=$_checkname '{st=0;perf="-";if(index($1,"CRITICAL") != 0){st=2} else if(index($1,"WARNING") != 0){st=1} else {gsub(/ /,"|",$2);perf=$2;};print st,checkname,perf,$1}'
+			awk -F'|' -v checkname=$_checkname '{st=0;perf="-";if(index($1,"CRITICAL") != 0){st=2} else if(index($1,"WARNING") != 0){st=1} else {gsub(/ /,"|",$2);perf=$2;};print st,checkname,perf,$1}' >$_cache_f
 	else
 		$check_http -H $_hostname -u $_path -T application/json --method=POST --post='{"id": "blockNumber", "jsonrpc": "2.0", "method": "eth_getBlockByNumber", "params": ["latest", false]}' -t $_timeout $_ssl_opt $_port_opt | tail -1 |
-			awk -F'|' -v checkname=$_checkname '{st=0;perf="-";if(index($1,"CRITICAL") != 0){st=2} else if(index($1,"WARNING") != 0){st=1} else {gsub(/ /,"|",$2);perf=$2;};print st,checkname,perf,$1}'
+			awk -F'|' -v checkname=$_checkname '{st=0;perf="-";if(index($1,"CRITICAL") != 0){st=2} else if(index($1,"WARNING") != 0){st=1} else {gsub(/ /,"|",$2);perf=$2;};print st,checkname,perf,$1}' >$_cache_f
 
 	fi
 
+	cat $_cache_f
 fi
