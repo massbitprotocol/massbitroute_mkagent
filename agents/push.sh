@@ -20,7 +20,7 @@ log_push=$SITE_ROOT/logs/monitor_push.log
 _update_local_check() {
 	while true; do
 		find $dir/local -type f -iname '*.sh' | while read cmd; do
-			bash $cmd 1 >>$log_local_check
+			timeout 300 bash $cmd 1 >>$log_local_check
 		done
 		sleep 10
 	done
