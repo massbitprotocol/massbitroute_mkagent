@@ -19,7 +19,9 @@ log_local_check=$SITE_ROOT/logs/local_check.log
 log_push=$SITE_ROOT/logs/monitor_push.log
 _update_local_check() {
 	while true; do
+		echo "$date" >>$log_local_check
 		find $dir/local -type f -iname '*.sh' | while read cmd; do
+			echo bash $cmd 1 >>$log_local_check
 			timeout 300 bash $cmd 1 >>$log_local_check
 		done
 		sleep 10
