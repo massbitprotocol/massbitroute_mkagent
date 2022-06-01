@@ -71,10 +71,10 @@ _test_speed() {
 	_ip=$1
 	_id=$2
 	_ff=/tmp/test_speed_$_id
-	# if [ -f "$_ff" ]; then
-	# 	cat $_ff
-	# 	return
-	# fi
+	if [ -f "$_ff" ]; then
+		cat $_ff
+		return
+	fi
 	tmp=$(mktemp)
 	wget --output-document=/dev/null --no-check-certificate https://$_ip/__log/128M 2>&1 >$tmp
 	if [ $? -eq 0 ]; then
