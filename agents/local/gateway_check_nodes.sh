@@ -86,6 +86,11 @@ if [ $cache -ne 1 ]; then
 
 	exit 0
 fi
+shift
+if [ $# -gt 0 ]; then
+	$@
+	exit 0
+fi
 
 tmp=$(mktemp)
 for _ss in 0-1 1-1; do
