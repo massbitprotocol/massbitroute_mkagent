@@ -86,8 +86,8 @@ _test_speed() {
 	timeout 5 wget -O $tmp --no-check-certificate https://$_ip/__log/128M
 	_size=$(stat --printf="%s" $tmp)
 	if [ $_size -gt 0 ]; then
-		_speed=$(expr $_size / 5 / 1024 / 1024)
-		echo "0 mbr-node-speed-${_id} speed=$_speed speed is $_speed MB/s" >$_ff
+		_speed=$(expr $_size / 5 / 1024)
+		echo "0 mbr-node-speed-${_id} speed=$_speed speed is $_speed KB/s" >$_ff
 	fi
 	cat $_ff
 	rm $tmp
