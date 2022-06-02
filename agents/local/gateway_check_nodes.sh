@@ -73,7 +73,9 @@ _http_api() {
 	_port=443
 	_ip="127.0.0.1"
 	_token="empty"
-	_http $_domain $_ip $_port $_path $_token $_blockchain mbr-api
+	if [ -n "$_domain" ]; then
+		_http $_domain $_ip $_port $_path $_token $_blockchain mbr-api
+	fi
 }
 _test_speed() {
 
