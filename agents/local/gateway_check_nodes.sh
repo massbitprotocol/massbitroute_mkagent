@@ -67,7 +67,6 @@ _http() {
 
 }
 _http_api() {
-	tmp=$1
 	_f=$(ls /massbit/massbitroute/app/src/sites/services/gateway/http.d/dapi-*.conf | head -1)
 	_domain=$(awk '/server_name/{sub(/;$/,"",$2);print $2}' $_f | head -1)
 	_path=$(awk '/location \/[^ ]/{print $2}' $_f | head -1)
@@ -75,7 +74,6 @@ _http_api() {
 	_ip="127.0.0.1"
 	_token="empty"
 	_http $_domain $_ip $_port $_path $_token $_blockchain mbr-api
-	#>>$tmp
 }
 _test_speed() {
 
@@ -131,6 +129,7 @@ for _ss in 0-1 1-1; do
 		_http $_domain $_ip $_port $_path $_token $_blockchain mbr-node-${_continent}-${_country}-$_id >>$tmp
 		_http $_ip $_ip $_port $_path_ping $_token $_blockchain mbr-node-${_continent}-${_country}-${_id}-ping GET >>$tmp
 		_test_speed $_ip ${_continent}-${_country}-${_id} >>$tmp
+		_http_api >>$tmp
 
 	done
 
