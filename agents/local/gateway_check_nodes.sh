@@ -83,7 +83,13 @@ _test_speed() {
 		return
 	fi
 	tmp=$(mktemp)
-	wget --output-document=/dev/null --no-check-certificate https://$_ip/__log/128M 2>&1 | tail -2 | head -1 | awk -v id=$_id '{sub(/\(/,"",$3);sub(/\)/,"",$4);print "0 mbr-node-speed-"id,"speed="$3,"speed is",$3,$4}' >$_ff
+	timeout 5 wget -O $tmp --no-check-certificate https://$_ip/__log/128M
+	_size=$(stat --printf="%s" $tmp)
+	if [ $_size -gt 0 ]; then
+		_speed=$(expr $_size / 5 / 1024 / 1024)
+		echo "0 mbr-node-speed-${_id} speed=$_speed speed is $_speed MB/s" >$_ff
+	fi
+	cat $_ff
 	rm $tmp
 }
 cache=$1
