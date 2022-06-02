@@ -66,6 +66,17 @@ _http() {
 	fi
 
 }
+_http_api() {
+	tmp=$1
+	_f=$(ls /massbit/massbitroute/app/src/sites/services/gateway/http.d/dapi-*.conf | head -1)
+	_domain=$(awk '/server_name/{sub(/;$/,"",$2);print $2}' $_f | head -1)
+	_path=$(awk '/location \/[^ ]/{print $2}' $_f | head -1)
+	_port=443
+	_ip="127.0.0.1"
+	_token="empty"
+	_http $_domain $_ip $_port $_path $_token $_blockchain mbr-api
+	#>>$tmp
+}
 _test_speed() {
 
 	_ip=$1
