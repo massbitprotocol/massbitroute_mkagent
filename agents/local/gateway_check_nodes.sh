@@ -136,11 +136,10 @@ for _ss in 0-1 1-1; do
 		_http $_domain $_ip $_port $_path $_token $_blockchain mbr-node-${_continent}-${_country}-$_id >>$tmp
 		_http $_ip $_ip $_port $_path_ping $_token $_blockchain mbr-node-${_continent}-${_country}-${_id}-ping GET >>$tmp
 		_test_speed $_ip ${_continent}-${_country}-${_id} >>$tmp
-		_http_api >>$tmp
-
 	done
-
 done
+
+_http_api >>$tmp
 
 mv $tmp $_cache_f
 cat $_cache_f
