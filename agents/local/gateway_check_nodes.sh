@@ -48,7 +48,8 @@ _http() {
 	_blockchain=$6
 	_checkname=$7
 	_method=$8
-	_msg="ip=$_ip"
+	_info=$9
+	_msg="$_info ip=$_ip"
 	if [ -z "$_method" ]; then _method=POST; fi
 	if [ -z "$_checkname" ]; then
 		_checkname="mbr-node-$_idd"
@@ -72,11 +73,12 @@ _http_api() {
 	_domain=$(awk '/server_name/{sub(/;$/,"",$2);print $2}' $_f | head -1)
 	_path=$(awk '/location \/[^ ]/{print $2}' $_f | head -1)
 	_port=443
-	_ip=$(nslookup -type=A $_domain | awk '/Address:/{print $2}' | tail -2 | head -1)
+	# _ip=$(nslookup -type=A $_domain | awk '/Address:/{print $2}' | tail -2 | head -1)
+	_ip=$(host $_domain | awk '{print $4}' | head -1)
 	#	_ip="127.0.0.1"
 	_token="empty"
 	if [ -n "$_domain" ]; then
-		_http $_domain $_ip $_port $_path $_token $_blockchain mbr-api
+		_http $_domain $_ip $_port $_path $_token $_blockchain mbr-api "domain=$_domain"
 	fi
 }
 _test_speed() {
