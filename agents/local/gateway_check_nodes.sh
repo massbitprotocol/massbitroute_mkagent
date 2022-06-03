@@ -35,7 +35,6 @@ if [ -f "$_raw_f" ]; then
 	_country=$(cat $_raw_f | jq .geo.countryCode | sed 's/\"//g')
 	_continent=$(cat $_raw_f | jq .geo.continentCode | sed 's/\"//g')
 fi
-echo "0 node_info - type=$type ip=$_myip id=$_node_id blockchain=$_blockchain network=$_network continent=$_continent country=$_country"
 
 check_http="/usr/lib/nagios/plugins/check_http"
 _http() {
@@ -124,6 +123,7 @@ if [ $# -gt 0 ]; then
 fi
 
 tmp=$(mktemp)
+echo "0 node_info - type=$type ip=$_myip id=$_node_id blockchain=$_blockchain network=$_network continent=$_continent country=$_country" >>$tmp
 for _ss in 0-1 1-1; do
 	_listid=listid-${_blockchain}-${_network}-$_ss
 	curl -skL https://portal.$DOMAIN/deploy/info/node/$_listid >/tmp/$_listid
