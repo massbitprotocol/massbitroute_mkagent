@@ -48,21 +48,22 @@ _http() {
 	_blockchain=$6
 	_checkname=$7
 	_method=$8
+	_msg="ip=$_ip"
 	if [ -z "$_method" ]; then _method=POST; fi
 	if [ -z "$_checkname" ]; then
 		_checkname="mbr-node-$_idd"
 	fi
 	if [ "$_method" == "POST" ]; then
 		if [ "$_blockchain" == "dot" ]; then
-			$check_http -H $_hostname -k "x-api-key: $_token" -u $_path -T application/json --method=POST --post='{"jsonrpc":"2.0","method":"chain_getBlock","params": [],"id": 1}' -t $_timeout --ssl -p $_port | tail -1 |
-				awk -F'|' -v checkname=$_checkname '{st=0;perf="-";if(index($1,"CRITICAL") != 0){st=2} else if(index($1,"WARNING") != 0){st=1} else {gsub(/ /,"|",$2);perf=$2;};print st,checkname,perf,$1}'
+			$check_http -I $_ip -H $_hostname -k "x-api-key: $_token" -u $_path -T application/json --method=POST --post='{"jsonrpc":"2.0","method":"chain_getBlock","params": [],"id": 1}' -t $_timeout --ssl -p $_port | tail -1 |
+				awk -F'|' -v checkname=$_checkname -v msg="$_msg" '{st=0;perf="-";if(index($1,"CRITICAL") != 0){st=2} else if(index($1,"WARNING") != 0){st=1} else {gsub(/ /,"|",$2);perf=$2;};print st,checkname,perf,$1,msg}'
 		else
-			$check_http -H $_hostname -k "x-api-key: $_token" -u $_path -T application/json --method=POST --post='{"id": "blockNumber", "jsonrpc": "2.0", "method": "eth_getBlockByNumber", "params": ["latest", false]}' -t $_timeout --ssl -p $_port | tail -1 |
-				awk -F'|' -v checkname=$_checkname '{st=0;perf="-";if(index($1,"CRITICAL") != 0){st=2} else if(index($1,"WARNING") != 0){st=1} else {gsub(/ /,"|",$2);perf=$2;};print st,checkname,perf,$1}'
+			$check_http -I $_ip -H $_hostname -k "x-api-key: $_token" -u $_path -T application/json --method=POST --post='{"id": "blockNumber", "jsonrpc": "2.0", "method": "eth_getBlockByNumber", "params": ["latest", false]}' -t $_timeout --ssl -p $_port | tail -1 |
+				awk -F'|' -v checkname=$_checkname -v msg="$_msg" '{st=0;perf="-";if(index($1,"CRITICAL") != 0){st=2} else if(index($1,"WARNING") != 0){st=1} else {gsub(/ /,"|",$2);perf=$2;};print st,checkname,perf,$1,msg}'
 		fi
 	elif [ "$_method" == "GET" ]; then
-		$check_http -H $_hostname -k "x-api-key: $_token" -u $_path -T application/json --method=GET -t $_timeout --ssl -p $_port | tail -1 |
-			awk -F'|' -v checkname=$_checkname '{st=0;perf="-";if(index($1,"CRITICAL") != 0){st=2} else if(index($1,"WARNING") != 0){st=1} else {gsub(/ /,"|",$2);perf=$2;};print st,checkname,perf,$1}'
+		$check_http -I $_ip -H $_hostname -k "x-api-key: $_token" -u $_path -T application/json --method=GET -t $_timeout --ssl -p $_port | tail -1 |
+			awk -F'|' -v checkname=$_checkname -v msg="$_msg" '{st=0;perf="-";if(index($1,"CRITICAL") != 0){st=2} else if(index($1,"WARNING") != 0){st=1} else {gsub(/ /,"|",$2);perf=$2;};print st,checkname,perf,$1,msg}'
 	fi
 
 }
@@ -71,7 +72,8 @@ _http_api() {
 	_domain=$(awk '/server_name/{sub(/;$/,"",$2);print $2}' $_f | head -1)
 	_path=$(awk '/location \/[^ ]/{print $2}' $_f | head -1)
 	_port=443
-	_ip="127.0.0.1"
+	_ip=$(nslookup -type=A $_domain | awk '/Address:/{print $2}' | tail -2 | head -1)
+	#	_ip="127.0.0.1"
 	_token="empty"
 	if [ -n "$_domain" ]; then
 		_http $_domain $_ip $_port $_path $_token $_blockchain mbr-api
