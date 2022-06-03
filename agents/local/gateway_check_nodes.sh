@@ -100,7 +100,7 @@ _test_speed() {
 	_size=$(stat --printf="%s" $tmp)
 	if [ $_size -gt 0 ]; then
 		_speed=$(expr $_size / 4 / 1024)
-		echo "0 mbr-node-speed-${_id} speed=$_speed speed is $_speed KB/s" >$_ff
+		echo "0 mbr-node-speed-${_id} speed=$_speed speed is $_speed KB/s ip=$_ip" >$_ff
 		cat $_ff
 	fi
 
