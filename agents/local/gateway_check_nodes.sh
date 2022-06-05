@@ -67,20 +67,7 @@ _http() {
 	fi
 
 }
-_http_api() {
-	_f=$(ls /massbit/massbitroute/app/src/sites/services/gateway/http.d/dapi-*.conf | head -1)
-	_domain=$(awk '/server_name/{sub(/;$/,"",$2);print $2}' $_f | head -1)
-	_path=$(awk '/location \/[^ ]/{print $2}' $_f | head -1)
-	# _port=443
-	# _ip=$(nslookup -type=A $_domain | awk '/Address:/{print $2}' | tail -2 | head -1)
-	# _ip=$(host $_domain | awk '{print $4}' | head -1)
-	#	_ip="127.0.0.1"
-	# _token="empty"
-	if [ -n "$_domain" ]; then
-		_http_api_check $_domain $_path
-		# _http $_domain $_ip $_port $_path $_token $_blockchain mbr-api POST "domain=$_domain"
-	fi
-}
+
 _http_api_check() {
 	_dm=$1
 	_pt=$2
@@ -104,6 +91,20 @@ _http_api_check() {
 	cat $_tmp
 	rm $_tmp
 
+}
+_http_api() {
+	_f=$(ls /massbit/massbitroute/app/src/sites/services/gateway/http.d/dapi-*.conf | head -1)
+	_domain=$(awk '/server_name/{sub(/;$/,"",$2);print $2}' $_f | head -1)
+	_path=$(awk '/location \/[^ ]/{print $2}' $_f | head -1)
+	# _port=443
+	# _ip=$(nslookup -type=A $_domain | awk '/Address:/{print $2}' | tail -2 | head -1)
+	# _ip=$(host $_domain | awk '{print $4}' | head -1)
+	#	_ip="127.0.0.1"
+	# _token="empty"
+	if [ -n "$_domain" ]; then
+		_http_api_check $_domain $_path
+		# _http $_domain $_ip $_port $_path $_token $_blockchain mbr-api POST "domain=$_domain"
+	fi
 }
 _test_speed() {
 
