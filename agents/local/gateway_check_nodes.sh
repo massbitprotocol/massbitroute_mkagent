@@ -81,6 +81,7 @@ _http_api_check() {
 		fi
 		echo >>/tmp/$_listid
 		cat /tmp/$_listid | while read _id _user _block _net _ip _continent _country _token _status _approve _remain; do
+			if [ -z "$_id" ]; then continue; fi
 			_path="$_pt"
 			_path_ping="/ping"
 			_port=443
@@ -162,6 +163,7 @@ for _ss in 0-1 1-1; do
 	if [ $? -ne 0 ]; then return; fi
 	echo >>/tmp/$_listid
 	cat /tmp/$_listid | while read _id _user _block _net _ip _continent _country _token _status _approve _remain; do
+		if [ -z "$_id" ]; then continue; fi
 		_path="/"
 		_path_ping="/_ping"
 		_port=443
