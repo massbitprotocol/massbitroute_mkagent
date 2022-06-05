@@ -73,7 +73,7 @@ _http_api_check() {
 	_pt=$2
 	_tmp=$(mktemp)
 	for _ss in 0-1 1-1; do
-		_listid=listid-${_blockchain}-${_network}-{_continent}-${_country}-$_ss
+		_listid=listid-${_blockchain}-${_network}-${_continent}-${_country}-$_ss
 		timeout 3 curl -skL https://portal.$DOMAIN/deploy/info/gateway/$_listid >/tmp/$_listid
 		if [ $? -ne 0 ]; then
 			rm $_tmp
