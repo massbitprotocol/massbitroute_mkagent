@@ -71,14 +71,39 @@ _http_api() {
 	_f=$(ls /massbit/massbitroute/app/src/sites/services/gateway/http.d/dapi-*.conf | head -1)
 	_domain=$(awk '/server_name/{sub(/;$/,"",$2);print $2}' $_f | head -1)
 	_path=$(awk '/location \/[^ ]/{print $2}' $_f | head -1)
-	_port=443
+	# _port=443
 	# _ip=$(nslookup -type=A $_domain | awk '/Address:/{print $2}' | tail -2 | head -1)
-	_ip=$(host $_domain | awk '{print $4}' | head -1)
+	# _ip=$(host $_domain | awk '{print $4}' | head -1)
 	#	_ip="127.0.0.1"
-	_token="empty"
+	# _token="empty"
 	if [ -n "$_domain" ]; then
-		_http $_domain $_ip $_port $_path $_token $_blockchain mbr-api POST "domain=$_domain"
+		_http_api_check $_domain $_path
+		# _http $_domain $_ip $_port $_path $_token $_blockchain mbr-api POST "domain=$_domain"
 	fi
+}
+_http_api_check() {
+	_dm=$1
+	_pt=$2
+	_tmp=$(mktemp)
+	for _ss in 0-1 1-1; do
+		_listid=listid-${_blockchain}-${_network}-{_continent}-${_country}-$_ss
+		timeout 3 curl -skL https://portal.$DOMAIN/deploy/info/gateway/$_listid >/tmp/$_listid
+		if [ $? -ne 0 ]; then
+			rm $_tmp
+			return
+		fi
+		echo >>/tmp/$_listid
+		cat /tmp/$_listid | while read _id _user _block _net _ip _continent _country _token _status _approve _remain; do
+			_path="$_pt"
+			_port=443
+			_domain="$_dm"
+			_token="empty"
+			_http $_domain $_ip $_port $_path $_token $_blockchain mbr-api-$_ip POST "domain=$_domain"
+		done
+	done
+	cat $_tmp
+	rm $_tmp
+
 }
 _test_speed() {
 
@@ -98,6 +123,10 @@ _test_speed() {
 	fi
 	tmp=$(mktemp)
 	timeout 5 wget -O $tmp --no-check-certificate https://$_ip/__log/128M
+	if [ $? -ne 0 ]; then
+		rm $tmp
+		return
+	fi
 	_size=$(stat --printf="%s" $tmp)
 	if [ $_size -gt 0 ]; then
 		_speed=$(expr $_size / 4 / 1024)
@@ -126,7 +155,8 @@ tmp=$(mktemp)
 echo "0 node_info - type=$type ip=$_myip id=$_node_id blockchain=$_blockchain network=$_network continent=$_continent country=$_country" >>$tmp
 for _ss in 0-1 1-1; do
 	_listid=listid-${_blockchain}-${_network}-$_ss
-	curl -skL https://portal.$DOMAIN/deploy/info/node/$_listid >/tmp/$_listid
+	timeout 3 curl -skL https://portal.$DOMAIN/deploy/info/node/$_listid >/tmp/$_listid
+	if [ $? -ne 0 ]; then return; fi
 	echo >>/tmp/$_listid
 	cat /tmp/$_listid | while read _id _user _block _net _ip _continent _country _token _status _approve _remain; do
 		_path="/"
