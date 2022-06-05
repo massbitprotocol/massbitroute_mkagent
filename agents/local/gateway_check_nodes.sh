@@ -85,7 +85,7 @@ _http_api_check() {
 			_port=443
 			_domain="$_dm"
 			_token="empty"
-			_http $_domain $_ip $_port $_path $_token $_blockchain mbr-api-$_ip POST "domain=$_domain"
+			_http $_domain $_ip $_port $_path $_token $_blockchain mbr-api-${_continent}-${_country}-$_ip POST "domain=$_domain"
 		done
 	done
 	cat $_tmp
