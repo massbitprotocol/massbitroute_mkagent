@@ -35,8 +35,6 @@ if [ -f "$_raw_f" ]; then
 	_continent=$(cat $_raw_f | jq .geo.continentCode | sed 's/\"//g')
 fi
 
-echo "0 node_info - type=$type ip=$_myip id=$_node_id blockchain=$_blockchain network=$_network continent=$_continent country=$_country"
-
 check_http="/usr/lib/nagios/plugins/check_http"
 _http() {
 	_hostname=$1
@@ -109,6 +107,7 @@ if [ $cache -ne 1 ]; then
 fi
 
 tmp=$(mktemp)
+echo "0 node_info - hostname=$(hostname) type=$type ip=$_myip id=$_node_id blockchain=$_blockchain network=$_network continent=$_continent country=$_country" >>$tmp
 _node_check >>$tmp
 mv $tmp $_cache_f
 

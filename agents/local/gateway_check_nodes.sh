@@ -206,7 +206,7 @@ if [ $# -gt 0 ]; then
 fi
 
 tmp=$(mktemp)
-echo "0 node_info - type=$type ip=$_myip id=$_node_id blockchain=$_blockchain network=$_network continent=$_continent country=$_country" >>$tmp
+echo "0 node_info - hostname=$(hostname) type=$type ip=$_myip id=$_node_id blockchain=$_blockchain network=$_network continent=$_continent country=$_country" >>$tmp
 _node_check >>$tmp
 _http_api >>$tmp
 
