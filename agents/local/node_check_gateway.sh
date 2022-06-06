@@ -67,8 +67,9 @@ _http() {
 
 }
 _node_check_geo() {
-	_type=$1
-	_tmpd=$2
+	_tmpd=$1
+	_type=$2
+
 	for _ss in 0-1 1-1; do
 		_listid=listid-${_blockchain}-${_network}${_type}-$_ss
 		curl -skL https://portal.$DOMAIN/deploy/info/gateway/$_listid >/tmp/$_listid
@@ -90,11 +91,11 @@ _node_check_geo() {
 _node_check() {
 	_node_check_dir=$(mktemp -d)
 	_type="-${_continent}-${_country}"
-	_node_check_geo $_type $_node_check_dir
+	_node_check_geo $_node_check_dir $_type
 	_type="-${_continent}"
-	_node_check_geo $_type $_node_check_dir
-	_type="-"
-	_node_check_geo $_type $_node_check_dir
+	_node_check_geo $_node_check_dir $_type
+	_type=""
+	_node_check_geo $_node_check_dir $_type
 	rm -rf $_node_check_dir
 }
 cache=$1
