@@ -68,12 +68,13 @@ _http() {
 
 }
 
-_http_api_check() {
+_http_api_check_geo() {
 	_dm=$1
 	_pt=$2
+	_type=$3
 	_tmp=$(mktemp)
 	for _ss in 0-1 1-1; do
-		_listid=listid-${_blockchain}-${_network}-${_continent}-${_country}-$_ss
+		_listid=listid-${_blockchain}-${_network}${_type}-$_ss
 		timeout 3 curl -skL https://portal.$DOMAIN/deploy/info/gateway/$_listid >/tmp/$_listid
 		if [ $? -ne 0 ]; then
 			rm $_tmp
@@ -87,13 +88,23 @@ _http_api_check() {
 			_port=443
 			_domain="$_dm"
 			_token="empty"
-			_http $_domain $_ip $_port $_path $_token $_blockchain mbr-api-${_continent}-${_country}-$_ip POST "domain=$_domain" >>$_tmp
-			_http $_domain $_ip $_port $_path_ping $_token $_blockchain mbr-api-${_continent}-${_country}-${_ip}-ping GET "domain=$_domain" >>$_tmp
+			_http $_domain $_ip $_port $_path $_token $_blockchain mbr-api${_type}-$_ip POST "domain=$_domain" >>$_tmp
+			_http $_domain $_ip $_port $_path_ping $_token $_blockchain mbr-api${_type}-${_ip}-ping GET "domain=$_domain" >>$_tmp
 		done
 	done
 	cat $_tmp
 	rm $_tmp
 
+}
+_http_api_check() {
+	_dm=$1
+	_pt=$2
+	_type="-${_continent}-${_country}"
+	_http_api_check_geo $_dm $_pt $_type
+	_type="-${_continent}"
+	_http_api_check_geo $_dm $_pt $_type
+	_type=""
+	_http_api_check_geo $_dm $_pt $_type
 }
 _http_api() {
 	_f=$(ls /massbit/massbitroute/app/src/sites/services/gateway/http.d/dapi-*.conf | head -1)
