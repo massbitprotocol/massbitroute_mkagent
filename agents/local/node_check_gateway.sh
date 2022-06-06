@@ -72,7 +72,8 @@ _node_check_geo() {
 
 	for _ss in 0-1 1-1; do
 		_listid=listid-${_blockchain}-${_network}${_type}-$_ss
-		curl -skL https://portal.$DOMAIN/deploy/info/gateway/$_listid >/tmp/$_listid
+		timeout 3 curl -skL https://portal.$DOMAIN/deploy/info/gateway/$_listid >/tmp/$_listid
+		if [ $? -ne 0 ]; then continue; fi
 		echo >>/tmp/$_listid
 		cat /tmp/$_listid | while read _id _user _block _net _ip _continent _country _token _status _approve _remain; do
 			if [ -z "$_id" ]; then continue; fi
