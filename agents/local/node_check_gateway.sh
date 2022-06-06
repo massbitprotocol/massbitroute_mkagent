@@ -93,7 +93,7 @@ _node_check() {
 	_node_check_geo $_type $_node_check_dir
 	_type="-${_continent}"
 	_node_check_geo $_type $_node_check_dir
-	_type=""
+	_type="-"
 	_node_check_geo $_type $_node_check_dir
 	rm -rf $_node_check_dir
 }
