@@ -81,8 +81,8 @@ _node_check_geo() {
 			_path_ping="/_nodeip/$_myip/_ping"
 			_port=443
 			_domain="$_id.gw.mbr.$DOMAIN"
-			_http $_domain $_ip $_port $_path $_token $_blockchain mbr-gateway-${_continent}-${_country}-$_id             #>>$tmp
-			_http $_ip $_ip $_port $_path_ping $_token $_blockchain mbr-gateway-${_continent}-${_country}-${_id}-ping GET #>>$tmp
+			_http $_domain $_ip $_port $_path $_token $_blockchain mbr-gateway-${_type}-$_id             #>>$tmp
+			_http $_ip $_ip $_port $_path_ping $_token $_blockchain mbr-gateway-${_type}-${_id}-ping GET #>>$tmp
 		done
 	done
 
