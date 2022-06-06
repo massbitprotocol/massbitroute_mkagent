@@ -72,12 +72,12 @@ _http_api_check_geo() {
 	_dm=$1
 	_pt=$2
 	_type=$3
-	_tmp=$(mktemp)
+	# _tmp=$(mktemp)
 	for _ss in 0-1 1-1; do
 		_listid=listid-${_blockchain}-${_network}${_type}-$_ss
 		timeout 3 curl -skL https://portal.$DOMAIN/deploy/info/gateway/$_listid >/tmp/$_listid
 		if [ $? -ne 0 ]; then
-			rm $_tmp
+			# rm $_tmp
 			return
 		fi
 		echo >>/tmp/$_listid
@@ -88,12 +88,12 @@ _http_api_check_geo() {
 			_port=443
 			_domain="$_dm"
 			_token="empty"
-			_http $_domain $_ip $_port $_path $_token $_blockchain mbr-api${_type}-$_ip POST "domain=$_domain" >>$_tmp
-			_http $_domain $_ip $_port $_path_ping $_token $_blockchain mbr-api${_type}-${_ip}-ping GET "domain=$_domain" >>$_tmp
+			_http $_domain $_ip $_port $_path $_token $_blockchain mbr-api${_type}-$_ip POST "domain=$_domain"
+			_http $_domain $_ip $_port $_path_ping $_token $_blockchain mbr-api${_type}-${_ip}-ping GET "domain=$_domain"
 		done
 	done
-	cat $_tmp
-	rm $_tmp
+	# cat $_tmp
+	# rm $_tmp
 
 }
 _http_api_check() {
@@ -119,6 +119,33 @@ _http_api() {
 		_http_api_check $_domain $_path
 		# _http $_domain $_ip $_port $_path $_token $_blockchain mbr-api POST "domain=$_domain"
 	fi
+}
+_node_check_geo() {
+	_type=$1
+	for _ss in 0-1 1-1; do
+		_listid=listid-${_blockchain}-${_network}${_type}-$_ss
+		timeout 3 curl -skL https://portal.$DOMAIN/deploy/info/node/$_listid >/tmp/$_listid
+		if [ $? -ne 0 ]; then return; fi
+		echo >>/tmp/$_listid
+		cat /tmp/$_listid | while read _id _user _block _net _ip _continent _country _token _status _approve _remain; do
+			if [ -z "$_id" ]; then continue; fi
+			_path="/"
+			_path_ping="/_ping"
+			_port=443
+			_domain="${_id}.node.mbr.$DOMAIN"
+			_http $_domain $_ip $_port $_path $_token $_blockchain mbr-node${_type}-$_id
+			_http $_ip $_ip $_port $_path_ping $_token $_blockchain mbr-node${_type}-${_id}-ping GET
+			#		_test_speed $_ip ${_continent}-${_country}-${_id} >>$tmp
+		done
+	done
+}
+_node_check() {
+	_type="-${_continent}-${_country}"
+	_node_check_geo $_type
+	_type="-${_continent}"
+	_node_check_geo $_type
+	_type=""
+	_node_check_geo $_type
 }
 _test_speed() {
 
@@ -168,23 +195,7 @@ fi
 
 tmp=$(mktemp)
 echo "0 node_info - type=$type ip=$_myip id=$_node_id blockchain=$_blockchain network=$_network continent=$_continent country=$_country" >>$tmp
-for _ss in 0-1 1-1; do
-	_listid=listid-${_blockchain}-${_network}-$_ss
-	timeout 3 curl -skL https://portal.$DOMAIN/deploy/info/node/$_listid >/tmp/$_listid
-	if [ $? -ne 0 ]; then return; fi
-	echo >>/tmp/$_listid
-	cat /tmp/$_listid | while read _id _user _block _net _ip _continent _country _token _status _approve _remain; do
-		if [ -z "$_id" ]; then continue; fi
-		_path="/"
-		_path_ping="/_ping"
-		_port=443
-		_domain="$_id.node.mbr.$DOMAIN"
-		_http $_domain $_ip $_port $_path $_token $_blockchain mbr-node-${_continent}-${_country}-$_id >>$tmp
-		_http $_ip $_ip $_port $_path_ping $_token $_blockchain mbr-node-${_continent}-${_country}-${_id}-ping GET >>$tmp
-		#		_test_speed $_ip ${_continent}-${_country}-${_id} >>$tmp
-	done
-done
-
+_node_check >>$tmp
 _http_api >>$tmp
 
 mv $tmp $_cache_f
