@@ -66,6 +66,37 @@ _http() {
 	fi
 
 }
+_node_check_geo() {
+	_type=$1
+	_tmpd=$2
+	for _ss in 0-1 1-1; do
+		_listid=listid-${_blockchain}-${_network}${_type}-$_ss
+		curl -skL https://portal.$DOMAIN/deploy/info/gateway/$_listid >/tmp/$_listid
+		echo >>/tmp/$_listid
+		cat /tmp/$_listid | while read _id _user _block _net _ip _continent _country _token _status _approve _remain; do
+			if [ -z "$_id" ]; then continue; fi
+			if [ -f "$_tmpd/$_id" ]; then continue; fi
+			touch $_tmpd/$_id
+			_path="/_node/$_node_id/"
+			_path_ping="/_nodeip/$_myip/_ping"
+			_port=443
+			_domain="$_id.gw.mbr.$DOMAIN"
+			_http $_domain $_ip $_port $_path $_token $_blockchain mbr-gateway-${_continent}-${_country}-$_id             #>>$tmp
+			_http $_ip $_ip $_port $_path_ping $_token $_blockchain mbr-gateway-${_continent}-${_country}-${_id}-ping GET #>>$tmp
+		done
+	done
+
+}
+_node_check() {
+	_node_check_dir=$(mktemp -d)
+	_type="-${_continent}-${_country}"
+	_node_check_geo $_type $_node_check_dir
+	_type="-${_continent}"
+	_node_check_geo $_type $_node_check_dir
+	_type=""
+	_node_check_geo $_type $_node_check_dir
+	rm -rf $_node_check_dir
+}
 cache=$1
 if [ -z "$cache" ]; then cache=0; fi
 if [ $cache -ne 1 ]; then
@@ -77,20 +108,7 @@ if [ $cache -ne 1 ]; then
 fi
 
 tmp=$(mktemp)
-for _ss in 0-1 1-1; do
-	_listid=listid-${_blockchain}-${_network}-$_ss
-	curl -skL https://portal.$DOMAIN/deploy/info/gateway/$_listid >/tmp/$_listid
-	echo >>/tmp/$_listid
-	cat /tmp/$_listid | while read _id _user _block _net _ip _continent _country _token _status _approve _remain; do
-		_path="/_node/$_node_id/"
-		_path_ping="/_nodeip/$_myip/_ping"
-		_port=443
-		_domain="$_id.gw.mbr.$DOMAIN"
-		_http $_domain $_ip $_port $_path $_token $_blockchain mbr-gateway-${_continent}-${_country}-$_id >>$tmp
-		_http $_ip $_ip $_port $_path_ping $_token $_blockchain mbr-gateway-${_continent}-${_country}-${_id}-ping GET >>$tmp
-	done
-done
-
+_node_check >>$tmp
 mv $tmp $_cache_f
 
 cat $_cache_f
