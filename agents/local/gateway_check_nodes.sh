@@ -72,6 +72,7 @@ _http_api_check_geo() {
 	_dm=$1
 	_pt=$2
 	_type=$3
+	_tmpd=$4
 	# _tmp=$(mktemp)
 	for _ss in 0-1 1-1; do
 		_listid=listid-${_blockchain}-${_network}${_type}-$_ss
@@ -83,6 +84,8 @@ _http_api_check_geo() {
 		echo >>/tmp/$_listid
 		cat /tmp/$_listid | while read _id _user _block _net _ip _continent _country _token _status _approve _remain; do
 			if [ -z "$_id" ]; then continue; fi
+			if [ -f "$_tmpd/$_id" ]; then continue; fi
+			touch $_tmpd/$_id
 			_path="$_pt"
 			_path_ping="/ping"
 			_port=443
@@ -99,12 +102,14 @@ _http_api_check_geo() {
 _http_api_check() {
 	_dm=$1
 	_pt=$2
+	_api_check_dir=$(mktemp -d)
 	_type="-${_continent}-${_country}"
-	_http_api_check_geo $_dm $_pt $_type
+	_http_api_check_geo $_dm $_pt $_type $_api_check_dir
 	_type="-${_continent}"
-	_http_api_check_geo $_dm $_pt $_type
+	_http_api_check_geo $_dm $_pt $_type $_api_check_dir
 	_type=""
-	_http_api_check_geo $_dm $_pt $_type
+	_http_api_check_geo $_dm $_pt $_type $_api_check_dir
+	rm -rf $_api_check_dir
 }
 _http_api() {
 	_f=$(ls /massbit/massbitroute/app/src/sites/services/gateway/http.d/dapi-*.conf | head -1)
@@ -122,6 +127,7 @@ _http_api() {
 }
 _node_check_geo() {
 	_type=$1
+	_tmpd=$2
 	for _ss in 0-1 1-1; do
 		_listid=listid-${_blockchain}-${_network}${_type}-$_ss
 		timeout 3 curl -skL https://portal.$DOMAIN/deploy/info/node/$_listid >/tmp/$_listid
@@ -129,6 +135,8 @@ _node_check_geo() {
 		echo >>/tmp/$_listid
 		cat /tmp/$_listid | while read _id _user _block _net _ip _continent _country _token _status _approve _remain; do
 			if [ -z "$_id" ]; then continue; fi
+			if [ -f "$_tmpd/$_id" ]; then continue; fi
+			touch $_tmpd/$_id
 			_path="/"
 			_path_ping="/_ping"
 			_port=443
@@ -140,12 +148,14 @@ _node_check_geo() {
 	done
 }
 _node_check() {
+	_node_check_dir=$(mktemp -d)
 	_type="-${_continent}-${_country}"
-	_node_check_geo $_type
+	_node_check_geo $_type $_node_check_dir
 	_type="-${_continent}"
-	_node_check_geo $_type
+	_node_check_geo $_type $_node_check_dir
 	_type=""
-	_node_check_geo $_type
+	_node_check_geo $_type $_node_check_dir
+	rm -rf $_node_check_dir
 }
 _test_speed() {
 
