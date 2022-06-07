@@ -61,9 +61,11 @@ if [ -n "$_data_uri" ]; then
 	fi
 
 	_checkname="mbr-datasource-$_data_uri"
+
+	_tmp=$(mktemp)
 	if [ "$_blockchain" == "dot" ]; then
 		$check_http -H $_hostname -u $_path -T application/json --method=POST --post='{"jsonrpc":"2.0","method":"chain_getBlock","params": [],"id": 1}' -t $_timeout $_ssl_opt $_port_opt | tail -1 |
-			awk -F'|' -v checkname=$_checkname '{st=0;perf="-";if(index($1,"CRITICAL") != 0){st=2} else if(index($1,"WARNING") != 0){st=1} else {gsub(/ /,"|",$2);perf=$2;};print st,checkname,perf,$1}' >$_cache_f
+			awk -F'|' -v checkname=$_checkname '{st=0;perf="-";if(index($1,"CRITICAL") != 0){st=2} else if(index($1,"WARNING") != 0){st=1} else {gsub(/ /,"|",$2);perf=$2;};print st,checkname,perf,$1}' >>$_tmp
 		_n11=$(curl -sk https://portal.massbitroute.net/deploy/info/block.dot.latest)
 
 		_n22=$(curl --location --request POST $_data_uri \
@@ -73,12 +75,12 @@ if [ -n "$_data_uri" ]; then
 			_n1=$((16#$_n11))
 			_n2=$((16#$_n22))
 			_n=$(expr $_n1 - $_n2)
-			echo "0 mbr-datasource-sync delay=$_n ankr=$_n1 source=$_n2 delay=$_n"
+			echo "0 mbr-datasource-sync delay=$_n ankr=$_n1 source=$_n2 delay=$_n" >>$_tmp
 		fi
 
 	else
 		$check_http -H $_hostname -u $_path -T application/json --method=POST --post='{"id": "blockNumber", "jsonrpc": "2.0", "method": "eth_getBlockByNumber", "params": ["latest", false]}' -t $_timeout $_ssl_opt $_port_opt | tail -1 |
-			awk -F'|' -v checkname=$_checkname '{st=0;perf="-";if(index($1,"CRITICAL") != 0){st=2} else if(index($1,"WARNING") != 0){st=1} else {gsub(/ /,"|",$2);perf=$2;};print st,checkname,perf,$1}' >$_cache_f
+			awk -F'|' -v checkname=$_checkname '{st=0;perf="-";if(index($1,"CRITICAL") != 0){st=2} else if(index($1,"WARNING") != 0){st=1} else {gsub(/ /,"|",$2);perf=$2;};print st,checkname,perf,$1}' >>$_tmp
 		_n11=$(curl -sk https://portal.massbitroute.net/deploy/info/block.eth.latest)
 
 		_n22=$(curl --location --request POST $_data_uri \
@@ -88,10 +90,11 @@ if [ -n "$_data_uri" ]; then
 			_n1=$((16#$_n11))
 			_n2=$((16#$_n22))
 			_n=$(expr $_n1 - $_n2)
-			echo "0 mbr-datasource-sync delay=$_n ankr=$_n1 source=$_n2 delay=$_n" >>$_cache_f
+			echo "0 mbr-datasource-sync delay=$_n ankr=$_n1 source=$_n2 delay=$_n" >>$_tmp
 		fi
 
 	fi
+	mv $_tmp $_cache_f
 
 	cat $_cache_f
 fi
