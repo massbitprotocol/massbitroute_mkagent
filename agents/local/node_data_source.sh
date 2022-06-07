@@ -71,7 +71,7 @@ if [ -n "$_data_uri" ]; then
 		_n22=$(timeout 10 curl -sk --location --request POST $_data_uri \
 			--header 'Content-Type: application/json' \
 			--data-raw '{"id": "blockNumber", "jsonrpc": "2.0", "method": "eth_getBlockByNumber", "params": ["latest", false]}' | jq .result.number | sed 's/\"//g' | sed 's/^0x//g')
-		if [ \( -n "$_n11" \) -a \( -n "$_n22" \) ]; then
+		if [ \( "$_n11" != "null" \) -a \( "$_n22" != "null" \) ]; then
 			_n1=$((16#$_n11))
 			_n2=$((16#$_n22))
 			_n=$(expr $_n1 - $_n2)
@@ -86,7 +86,7 @@ if [ -n "$_data_uri" ]; then
 		_n22=$(timeout 10 curl -sk --location --request POST $_data_uri \
 			--header 'Content-Type: application/json' \
 			--data-raw '{"id": "blockNumber", "jsonrpc": "2.0", "method": "eth_getBlockByNumber", "params": ["latest", false]}' | jq .result.number | sed 's/\"//g' | sed 's/^0x//g')
-		if [ \( -n "$_n11" \) -a \( -n "$_n22" \) ]; then
+		if [ \( "$_n11" != "null" \) -a \( "$_n22" != "null" \) ]; then
 			_n1=$((16#$_n11))
 			_n2=$((16#$_n22))
 			_n=$(expr $_n1 - $_n2)
