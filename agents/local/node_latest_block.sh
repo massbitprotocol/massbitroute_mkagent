@@ -1,4 +1,6 @@
 #!/bin/bash
+cache=$1
+if [ $cache -ne 1 ]; then exit 0; fi
 _type_f=/massbit/massbitroute/app/src/sites/services/api/vars/TYPE
 if [ -f "$_type_f" ]; then
 	_type=$(cat $_type_f)
