@@ -14,13 +14,13 @@ if [ "$_type" == "mbr-api" ]; then
 		fi
 	fi
 
-	_n11=$(timeout 10 curl --location --request POST 'https://rpc.ankr.com/eth' \
+	_n22=$(timeout 10 curl --location --request POST 'https://rpc.ankr.com/eth' \
 		--header 'Content-Type: application/json' \
 		--data-raw '{"id": "blockNumber", "jsonrpc": "2.0", "method": "eth_getBlockByNumber", "params": ["latest", false]}' | jq .result.number | sed 's/\"//g' | sed 's/^0x//g')
-	if [ -n "$_n11" ]; then
-		_n1=$((16#$_n11))
-		if [ $_n1 -gt 0 ]; then
-			echo $_n1 >/massbit/massbitroute/app/src/sites/services/api/public/deploy/info/block.eth.latest
+	if [ -n "$_n22" ]; then
+		_n2=$((16#$_n22))
+		if [ $_n2 -gt 0 ]; then
+			echo $_n2 >/massbit/massbitroute/app/src/sites/services/api/public/deploy/info/block.eth.latest
 		fi
 	fi
 fi
