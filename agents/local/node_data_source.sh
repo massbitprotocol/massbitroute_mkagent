@@ -13,6 +13,7 @@ fi
 
 _timeout=3
 SITE_ROOT=/massbit/massbitroute/app/src/sites/services/node
+
 type=$(supervisorctl status | awk '/mbr_(gateway|node) /{print $1}')
 if [ "$type" != "mbr_node" ]; then
 	exit 0
@@ -26,6 +27,7 @@ fi
 
 _data_uri=$(grep proxy_pass $SITE_ROOT/http.d/*.conf | tail -1 | awk '/proxy_pass/{sub(/;$/,"",$2);print $2}')
 if [ -n "$_data_uri" ]; then
+	source $SITE_ROOT/.env_raw
 	_blockchain="/massbit/massbitroute/app/src/sites/services/node/vars/BLOCKCHAIN"
 	_network="/massbit/massbitroute/app/src/sites/services/node/vars/NETWORK"
 
