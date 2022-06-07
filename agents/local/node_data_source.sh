@@ -66,9 +66,9 @@ if [ -n "$_data_uri" ]; then
 	if [ "$_blockchain" == "dot" ]; then
 		$check_http -H $_hostname -u $_path -T application/json --method=POST --post='{"jsonrpc":"2.0","method":"chain_getBlock","params": [],"id": 1}' -t $_timeout $_ssl_opt $_port_opt | tail -1 |
 			awk -F'|' -v checkname=$_checkname '{st=0;perf="-";if(index($1,"CRITICAL") != 0){st=2} else if(index($1,"WARNING") != 0){st=1} else {gsub(/ /,"|",$2);perf=$2;};print st,checkname,perf,$1}' >>$_tmp
-		_n11=$(curl -sk https://portal.massbitroute.net/deploy/info/block.dot.latest)
+		_n11=$(timeout 10 curl -sk https://portal.massbitroute.net/deploy/info/block.dot.latest)
 
-		_n22=$(curl --location --request POST $_data_uri \
+		_n22=$(timeout 10 curl -sk --location --request POST $_data_uri \
 			--header 'Content-Type: application/json' \
 			--data-raw '{"id": "blockNumber", "jsonrpc": "2.0", "method": "eth_getBlockByNumber", "params": ["latest", false]}' | jq .result.number | sed 's/\"//g' | sed 's/^0x//g')
 		if [ \( -n "$_n11" \) -a \( -n "$_n22" \) ]; then
@@ -81,9 +81,9 @@ if [ -n "$_data_uri" ]; then
 	else
 		$check_http -H $_hostname -u $_path -T application/json --method=POST --post='{"id": "blockNumber", "jsonrpc": "2.0", "method": "eth_getBlockByNumber", "params": ["latest", false]}' -t $_timeout $_ssl_opt $_port_opt | tail -1 |
 			awk -F'|' -v checkname=$_checkname '{st=0;perf="-";if(index($1,"CRITICAL") != 0){st=2} else if(index($1,"WARNING") != 0){st=1} else {gsub(/ /,"|",$2);perf=$2;};print st,checkname,perf,$1}' >>$_tmp
-		_n11=$(curl -sk https://portal.massbitroute.net/deploy/info/block.eth.latest)
+		_n11=$(timeout 10 curl -sk https://portal.massbitroute.net/deploy/info/block.eth.latest)
 
-		_n22=$(curl --location --request POST $_data_uri \
+		_n22=$(timeout 10 curl -sk --location --request POST $_data_uri \
 			--header 'Content-Type: application/json' \
 			--data-raw '{"id": "blockNumber", "jsonrpc": "2.0", "method": "eth_getBlockByNumber", "params": ["latest", false]}' | jq .result.number | sed 's/\"//g' | sed 's/^0x//g')
 		if [ \( -n "$_n11" \) -a \( -n "$_n22" \) ]; then
