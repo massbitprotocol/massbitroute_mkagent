@@ -73,7 +73,7 @@ if [ -n "$_data_uri" ]; then
 			_n1=$((16#$_n11))
 			_n2=$((16#$_n22))
 			_n=$(expr $_n1 - $_n2)
-			echo "0 mbr-datasource-sync delay=$n ankr=$_n1 source=$_n2 delay=$_n"
+			echo "0 mbr-datasource-sync delay=$_n ankr=$_n1 source=$_n2 delay=$_n"
 		fi
 
 	else
@@ -88,7 +88,7 @@ if [ -n "$_data_uri" ]; then
 			_n1=$((16#$_n11))
 			_n2=$((16#$_n22))
 			_n=$(expr $_n1 - $_n2)
-			echo "0 mbr-datasource-sync delay=$n ankr=$_n1 source=$_n2 delay=$_n" >>$_cache_f
+			echo "0 mbr-datasource-sync delay=$_n ankr=$_n1 source=$_n2 delay=$_n" >>$_cache_f
 		fi
 
 	fi
