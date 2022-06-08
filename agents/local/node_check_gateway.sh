@@ -3,13 +3,14 @@ type=$(supervisorctl status | awk '/mbr_(gateway|node) /{sub(/^mbr_/,"",$1);prin
 if [ "$type" != "node" ]; then
 	exit 0
 fi
+SITE_ROOT=/massbit/massbitroute/app/src/sites/services/$type
 _cache_f=/tmp/node_check_gateway
-_node_id_f="/massbit/massbitroute/app/src/sites/services/$type/vars/ID"
-_blockchain_f="/massbit/massbitroute/app/src/sites/services/$type/vars/BLOCKCHAIN"
-_ip_f="/massbit/massbitroute/app/src/sites/services/$type/vars/IP"
-_network_f="/massbit/massbitroute/app/src/sites/services/$type/vars/NETWORK"
-_raw_f="/massbit/massbitroute/app/src/sites/services/$type/vars/RAW"
-_env="/massbit/massbitroute/app/src/sites/services/$type/.env_raw"
+_node_id_f="$SITE_ROOT/vars/ID"
+_blockchain_f="$SITE_ROOT/vars/BLOCKCHAIN"
+_ip_f="$SITE_ROOT/vars/IP"
+_network_f="$SITE_ROOT/vars/NETWORK"
+_raw_f="$SITE_ROOT/vars/RAW"
+_env="$SITE_ROOT/.env_raw"
 if [ -f "$_env" ]; then source $_env; fi
 _blockchain="eth"
 _network="mainnet"
@@ -109,6 +110,8 @@ if [ $cache -ne 1 ]; then
 
 	exit 0
 fi
+mbr=$SITE_ROOT/mbr
+if [ -f "$mbr" ];then $mbr node nodeinfo;fi
 
 tmp=$(mktemp)
 echo "0 node_info - hostname=$(hostname) status=${_status} operateStatus=${_opstatus} type=$type ip=$_myip id=$_node_id blockchain=$_blockchain network=$_network continent=$_continent country=$_country" >>$tmp
