@@ -100,13 +100,13 @@ if [ -n "$_data_uri" ]; then
 	if [ "$_blockchain" == "dot" ]; then
 		$check_http -H $_hostname -u $_path -T application/json --method=POST --post='{"jsonrpc":"2.0","method":"chain_getBlock","params": [],"id": 1}' -t $_timeout $_ssl_opt $_port_opt | tail -1 |
 			awk -F'|' -v checkname=$_checkname '{st=0;perf="-";if(index($1,"CRITICAL") != 0){st=2} else if(index($1,"WARNING") != 0){st=1} else {gsub(/ /,"|",$2);perf=$2;};print st,checkname,perf,$1}' >>$_tmp
-		_n11=$(timeout 10 curl -sk https://portal.$DOMAIN/deploy/info/block.dot.latest)
+		_n1=$(timeout 10 curl -sk https://portal.$DOMAIN/deploy/info/block.dot.latest)
 
 		_n22=$(timeout 10 curl -sk --location --request POST $_data_uri \
 			--header 'Content-Type: application/json' \
 			--data-raw '{"jsonrpc":"2.0","method":"chain_getBlock","params": [],"id": 1}' | jq .result.block.header.number | sed 's/\"//g' | sed 's/^0x//g')
-		if [ \( "$_n11" != "null" \) -a \( "$_n22" != "null" \) ]; then
-			_n1=$((16#$_n11))
+		if [ \( "$_n1" != "null" \) -a \( "$_n22" != "null" \) ]; then
+			#_n1=$((16#$_n11))
 			_n2=$((16#$_n22))
 			_n=$(expr $_n1 - $_n2)
 			echo "0 mbr-datasource-sync delay=$_n base=$_n1 source=$_n2 delay=$_n" >>$_tmp
@@ -117,13 +117,13 @@ if [ -n "$_data_uri" ]; then
 	else
 		$check_http -H $_hostname -u $_path -T application/json --method=POST --post='{"id": "blockNumber", "jsonrpc": "2.0", "method": "eth_getBlockByNumber", "params": ["latest", false]}' -t $_timeout $_ssl_opt $_port_opt | tail -1 |
 			awk -F'|' -v checkname=$_checkname '{st=0;perf="-";if(index($1,"CRITICAL") != 0){st=2} else if(index($1,"WARNING") != 0){st=1} else {gsub(/ /,"|",$2);perf=$2;};print st,checkname,perf,$1}' >>$_tmp
-		_n11=$(timeout 10 curl -sk https://portal.$DOMAIN/deploy/info/block.eth.latest)
+		_n1=$(timeout 10 curl -sk https://portal.$DOMAIN/deploy/info/block.eth.latest)
 
 		_n22=$(timeout 10 curl -sk --location --request POST $_data_uri \
 			--header 'Content-Type: application/json' \
 			--data-raw '{"id": "blockNumber", "jsonrpc": "2.0", "method": "eth_getBlockByNumber", "params": ["latest", false]}' | jq .result.number | sed 's/\"//g' | sed 's/^0x//g')
-		if [ \( "$_n11" != "null" \) -a \( "$_n22" != "null" \) ]; then
-			_n1=$((16#$_n11))
+		if [ \( "$_n1" != "null" \) -a \( "$_n22" != "null" \) ]; then
+		#	_n1=$((16#$_n11))
 			_n2=$((16#$_n22))
 			_n=$(expr $_n1 - $_n2)
 			echo "0 mbr-datasource-sync delay=$_n base=$_n1 source=$_n2 delay=$_n" >>$_tmp
