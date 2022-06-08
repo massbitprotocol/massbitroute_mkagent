@@ -116,8 +116,8 @@ _http_api_check_geo() {
 			_port=443
 			_domain="$_dm"
 			_token="empty"
-			_http $_domain $_ip $_port $_path $_token $_blockchain mbr-api${_type}-$_ip POST "domain=$_domain"
-			_http $_domain $_ip $_port $_path_ping $_token $_blockchain mbr-api${_type}-${_ip}-ping GET "domain=$_domain"
+			_http $_domain $_ip $_port $_path $_token $_blockchain mbr-api${_type}-$_ip POST "domain=$_domain id=$_id"
+			_http $_domain $_ip $_port $_path_ping $_token $_blockchain mbr-api${_type}-${_ip}-ping GET "domain=$_domain id=$_id"
 		done
 	done
 	# cat $_tmp
