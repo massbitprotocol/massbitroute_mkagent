@@ -3,15 +3,34 @@ type=$(supervisorctl status | awk '/mbr_(gateway|node) /{sub(/^mbr_/,"",$1);prin
 if [ "$type" != "gateway" ]; then
 	exit 0
 fi
+SITE_ROOT=/massbit/massbitroute/app/src/sites/services/$type
+if [ -f "$SITE_ROOT/.env_raw" ];then
+    source $SITE_ROOT/.env_raw >/dev/null
+fi
+
+check_http="/usr/lib/nagios/plugins/check_http"
+if [ ! -f "$check_http" ]; then
+	apt install -y monitoring-plugins
+fi
 if [ ! -f "/usr/bin/wget" ]; then apt install -y wget; fi
-_cache_f=/tmp/gateway_check_nodes
-_node_id_f="/massbit/massbitroute/app/src/sites/services/$type/vars/ID"
-_ip_f="/massbit/massbitroute/app/src/sites/services/$type/vars/IP"
-_blockchain_f="/massbit/massbitroute/app/src/sites/services/$type/vars/BLOCKCHAIN"
-_network_f="/massbit/massbitroute/app/src/sites/services/$type/vars/NETWORK"
-_raw_f="/massbit/massbitroute/app/src/sites/services/$type/vars/RAW"
-_env="/massbit/massbitroute/app/src/sites/services/$type/.env_raw"
-if [ -f "$_env" ]; then source $_env; fi
+_cache_f=/tmp/${type}_check_nodes
+cache=$1
+if [ -z "$cache" ]; then cache=0; fi
+if [ $cache -ne 1 ]; then
+	if [ -f "$_cache_f" ]; then
+		cat $_cache_f
+	fi
+
+	exit 0
+fi
+shift
+
+_node_id_f="$SITE_ROOT/vars/ID"
+_ip_f="$SITE_ROOT/vars/IP"
+_blockchain_f="$SITE_ROOT/vars/BLOCKCHAIN"
+_network_f="$SITE_ROOT/vars/NETWORK"
+_raw_f="$SITE_ROOT/vars/RAW"
+
 _blockchain="eth"
 _network="mainnet"
 _timeout=3
@@ -37,7 +56,7 @@ if [ -f "$_raw_f" ]; then
 	_status=$(cat $_raw_f | jq .status | sed 's/\"//g')
 fi
 
-check_http="/usr/lib/nagios/plugins/check_http"
+
 _http() {
 	_hostname=$1
 
@@ -194,16 +213,7 @@ _test_speed() {
 
 	rm $tmp
 }
-cache=$1
-if [ -z "$cache" ]; then cache=0; fi
-if [ $cache -ne 1 ]; then
-	if [ -f "$_cache_f" ]; then
-		cat $_cache_f
-	fi
 
-	exit 0
-fi
-shift
 if [ $# -gt 0 ]; then
 	$@
 	exit 0
