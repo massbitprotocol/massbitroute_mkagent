@@ -4,8 +4,8 @@ if [ "$type" != "node" ]; then
 	exit 0
 fi
 SITE_ROOT=/massbit/massbitroute/app/src/sites/services/$type
-if [ -f "$SITE_ROOT/.env_raw" ];then
-    source $SITE_ROOT/.env_raw >/dev/null
+if [ -f "$SITE_ROOT/.env_raw" ]; then
+	source $SITE_ROOT/.env_raw >/dev/null
 fi
 check_http="/usr/lib/nagios/plugins/check_http"
 
@@ -24,8 +24,6 @@ if [ $cache -ne 1 ]; then
 	exit 0
 fi
 shift
-
-
 
 _blockchain_f="$SITE_ROOT/vars/BLOCKCHAIN"
 _network_f="$SITE_ROOT/vars/NETWORK"
@@ -48,11 +46,6 @@ if [ -f "$_raw_f" ]; then
 	_status=$(cat $_raw_f | jq .status | sed 's/\"//g')
 	_data_uri=$(cat $_raw_f | jq .dataSource | sed 's/\"//g')
 fi
-
-
-
-
-
 
 # _data_uri_f="/massbit/massbitroute/app/src/sites/services/node/vars/DATA_URI"
 
@@ -109,7 +102,10 @@ if [ -n "$_data_uri" ]; then
 			#_n1=$((16#$_n11))
 			_n2=$((16#$_n22))
 			_n=$(expr $_n1 - $_n2)
-			echo "0 mbr-datasource-sync delay=$_n base=$_n1 source=$_n2 delay=$_n" >>$_tmp
+			_st=0
+			if [ $_n -gt 1000 ]; then _st=2; fi
+			if [ $_n -gt 100 ]; then _st=1; fi
+			echo "$_st mbr-datasource-sync delay=$_n base=$_n1 source=$_n2 delay=$_n" >>$_tmp
 		else
 			echo "2 mbr-datasource-sync - base=$_n1 source=null" >>$_tmp
 		fi
@@ -123,10 +119,13 @@ if [ -n "$_data_uri" ]; then
 			--header 'Content-Type: application/json' \
 			--data-raw '{"id": "blockNumber", "jsonrpc": "2.0", "method": "eth_getBlockByNumber", "params": ["latest", false]}' | jq .result.number | sed 's/\"//g' | sed 's/^0x//g')
 		if [ \( "$_n1" != "null" \) -a \( "$_n22" != "null" \) ]; then
-		#	_n1=$((16#$_n11))
+			#	_n1=$((16#$_n11))
 			_n2=$((16#$_n22))
 			_n=$(expr $_n1 - $_n2)
-			echo "0 mbr-datasource-sync delay=$_n base=$_n1 source=$_n2 delay=$_n" >>$_tmp
+			_st=0
+			if [ $_n -gt 1000 ]; then _st=2; fi
+			if [ $_n -gt 100 ]; then _st=1; fi
+			echo "$_st mbr-datasource-sync delay=$_n base=$_n1 source=$_n2 delay=$_n" >>$_tmp
 		else
 			echo "2 mbr-datasource-sync - base=$_n1 source=null" >>$_tmp
 		fi
