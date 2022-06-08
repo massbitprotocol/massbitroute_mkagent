@@ -104,14 +104,14 @@ if [ -n "$_data_uri" ]; then
 
 		_n22=$(timeout 10 curl -sk --location --request POST $_data_uri \
 			--header 'Content-Type: application/json' \
-			--data-raw '{"jsonrpc":"2.0","method":"chain_getBlock","params": [],"id": 1}' | jq .result.number | sed 's/\"//g' | sed 's/^0x//g')
+			--data-raw '{"jsonrpc":"2.0","method":"chain_getBlock","params": [],"id": 1}' | jq .result.block.header.number | sed 's/\"//g' | sed 's/^0x//g')
 		if [ \( "$_n11" != "null" \) -a \( "$_n22" != "null" \) ]; then
 			_n1=$((16#$_n11))
 			_n2=$((16#$_n22))
 			_n=$(expr $_n1 - $_n2)
 			echo "0 mbr-datasource-sync delay=$_n base=$_n1 source=$_n2 delay=$_n" >>$_tmp
 		else
-			echo "2 mbr-datasource-sync - source is null" >>$_tmp
+			echo "2 mbr-datasource-sync - base=$_n1 source=null" >>$_tmp
 		fi
 
 	else
@@ -128,7 +128,7 @@ if [ -n "$_data_uri" ]; then
 			_n=$(expr $_n1 - $_n2)
 			echo "0 mbr-datasource-sync delay=$_n base=$_n1 source=$_n2 delay=$_n" >>$_tmp
 		else
-			echo "2 mbr-datasource-sync - source is null" >>$_tmp
+			echo "2 mbr-datasource-sync - base=$_n1 source=null" >>$_tmp
 		fi
 
 	fi
