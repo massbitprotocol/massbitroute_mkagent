@@ -54,6 +54,7 @@ if [ -f "$_raw_f" ]; then
 	_country=$(cat $_raw_f | jq .geo.countryCode | sed 's/\"//g')
 	_continent=$(cat $_raw_f | jq .geo.continentCode | sed 's/\"//g')
 	_status=$(cat $_raw_f | jq .status | sed 's/\"//g')
+	_opstatus=$(cat $_raw_f | jq .operateStatus | sed 's/\"//g')
 fi
 
 
@@ -220,7 +221,7 @@ if [ $# -gt 0 ]; then
 fi
 
 tmp=$(mktemp)
-echo "0 node_info - status=${_status} hostname=$(hostname) type=$type ip=$_myip id=$_node_id blockchain=$_blockchain network=$_network continent=$_continent country=$_country" >>$tmp
+echo "0 node_info - hostname=$(hostname) status=${_status} operateStatus=${_opstatus} type=$type ip=$_myip id=$_node_id blockchain=$_blockchain network=$_network continent=$_continent country=$_country" >>$tmp
 _node_check >>$tmp
 _http_api >>$tmp
 
