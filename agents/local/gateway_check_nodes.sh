@@ -186,7 +186,7 @@ _test_speed() {
 
 	_ip=$1
 	_id=$2
-	# _ff=/tmp/test_speed_$_id
+	_ff=/tmp/test_speed_$_id
 
 	# if [ -f "$_ff" ]; then
 	# 	_cont=$(cat $_ff)
