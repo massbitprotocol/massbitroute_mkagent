@@ -167,7 +167,7 @@ _test_speed() {
 	fi
 	tmp=$(mktemp)
 	_tm=15
-	_tm1=$((_tm - 1))
+	_tm1=14
 	_speed=0
 	timeout $_tm wget -O $tmp --no-check-certificate https://$_ip/__log/128M
 	if [ $? -eq 0 ]; then
