@@ -62,7 +62,7 @@ _http() {
 
 	_idd=$(echo $_hostname | cut -d'.' -f1)
 	_ip=$2
-	if [ "$_ip" == "443"]; then return; fi
+	if [ "$_ip" == "443" ]; then return; fi
 	_port=$3
 	_path=$4
 	_token=$5
