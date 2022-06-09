@@ -18,6 +18,7 @@ if [ ! -f "/usr/bin/parallel" ]; then apt install -y parallel; fi
 log_local_check=$SITE_ROOT/logs/local_check.log
 log_push=$SITE_ROOT/logs/monitor_push.log
 state_dir=/massbit/massbitroute/app/src/sites/services/mkagent/agents/state
+mkdir -p $state_dir
 _update_local_check() {
 	while true; do
 		echo "$date" >>$log_local_check
@@ -28,7 +29,7 @@ _update_local_check() {
 		done
 		_t2=$(date +%s)
 		_t=$(expr $t2 - $t1)
-		echo "0 local_check_time t=$_t time run $_t seconds"
+		echo "0 local_check_time t=$_t time run $_t seconds" >$state_dir
 		sleep 10
 	done
 }
