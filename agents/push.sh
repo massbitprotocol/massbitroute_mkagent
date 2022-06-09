@@ -17,13 +17,18 @@ cd $dir
 if [ ! -f "/usr/bin/parallel" ]; then apt install -y parallel; fi
 log_local_check=$SITE_ROOT/logs/local_check.log
 log_push=$SITE_ROOT/logs/monitor_push.log
+state_dir=/massbit/massbitroute/app/src/sites/services/mkagent/agents/state
 _update_local_check() {
 	while true; do
 		echo "$date" >>$log_local_check
+		_t1=$(date +%s)
 		find $dir/local -type f -iname '*.sh' | while read cmd; do
 			echo bash $cmd 1 >>$log_local_check
 			timeout 300 bash $cmd 1 >>$log_local_check
 		done
+		_t2=$(date +%s)
+		_t=$(expr $t2 - $t1)
+		echo "0 local_check_time t=$_t time run $_t seconds"
 		sleep 10
 	done
 }
