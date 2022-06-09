@@ -4,8 +4,8 @@ if [ "$type" != "gateway" ]; then
 	exit 0
 fi
 SITE_ROOT=/massbit/massbitroute/app/src/sites/services/$type
-if [ -f "$SITE_ROOT/.env_raw" ];then
-    source $SITE_ROOT/.env_raw >/dev/null
+if [ -f "$SITE_ROOT/.env_raw" ]; then
+	source $SITE_ROOT/.env_raw >/dev/null
 fi
 
 check_http="/usr/lib/nagios/plugins/check_http"
@@ -56,7 +56,6 @@ if [ -f "$_raw_f" ]; then
 	_status=$(cat $_raw_f | jq .status | sed 's/\"//g')
 	_opstatus=$(cat $_raw_f | jq .operateStatus | sed 's/\"//g')
 fi
-
 
 _http() {
 	_hostname=$1
@@ -187,32 +186,46 @@ _test_speed() {
 
 	_ip=$1
 	_id=$2
-	_ff=/tmp/test_speed_$_id
+	# _ff=/tmp/test_speed_$_id
 
-	if [ -f "$_ff" ]; then
-		_cont=$(cat $_ff)
-		if [ -z "$_cont" ]; then
-			rm $_ff
-		else
-			cat $_ff
-		fi
+	# if [ -f "$_ff" ]; then
+	# 	_cont=$(cat $_ff)
+	# 	if [ -z "$_cont" ]; then
+	# 		rm $_ff
+	# 	else
+	# 		cat $_ff
+	# 	fi
 
-		return
-	fi
+	# 	return
+	# fi
 	tmp=$(mktemp)
-	timeout 5 wget -O $tmp --no-check-certificate https://$_ip/__log/128M
+	URL=https://$_ip/__log/128M
+	_tm=10
+	_time_total=$(timeout $_tm curl -k -s -w "%{time_total}\n" -o /dev/null "$URL" 2>&1)
+	# if [ $? -eq 0 ];then
+	#     _speed=$(echo  128*1024*8/$_time_total|bc)
+	# fi
+
+	# timeout 5 wget -O $tmp --no-check-certificate https://$_ip/__log/128M
 	if [ $? -ne 0 ]; then
-		rm $tmp
-		return
-	fi
-	_size=$(stat --printf="%s" $tmp)
-	if [ $_size -gt 0 ]; then
-		_speed=$(expr $_size / 4 / 1024)
+		echo "2 mbr-node-speed-${_id} speed=0 Timeout $_tm seconds  ip=$_ip" >$_ff
+		# rm $tmp
+		# return
+	else
+		_speed=$(echo 128*1024*8/$_time_total | bc)
 		echo "0 mbr-node-speed-${_id} speed=$_speed speed is $_speed KB/s ip=$_ip" >$_ff
-		cat $_ff
+		# cat $_ff
 	fi
+	# _size=$(stat --printf="%s" $tmp)
+	# if [ $_size -gt 0 ]; then
+	# 	_speed=$(expr $_size / 4 / 1024)
+	# 	_speed=$(echo 128*1024*8/$_time_total | bc)
+	# 	echo "0 mbr-node-speed-${_id} speed=$_speed speed is $_speed KB/s ip=$_ip" >$_ff
+	# 	cat $_ff
+	# fi
 
 	rm $tmp
+	cat $_ff
 }
 
 if [ $# -gt 0 ]; then
@@ -221,7 +234,7 @@ if [ $# -gt 0 ]; then
 fi
 
 mbr=$SITE_ROOT/mbr
-if [ -f "$mbr" ];then $mbr node nodeinfo;fi
+if [ -f "$mbr" ]; then $mbr node nodeinfo; fi
 
 tmp=$(mktemp)
 echo "0 node_info - hostname=$(hostname) status=${_status} operateStatus=${_opstatus} type=$type ip=$_myip id=$_node_id blockchain=$_blockchain network=$_network continent=$_continent country=$_country" >>$tmp
