@@ -200,7 +200,7 @@ _test_speed() {
 	# fi
 	tmp=$(mktemp)
 	URL=https://$_ip/__log/128M
-	_tm=10
+	_tm=5
 	_time_total=$(timeout $_tm curl -k -s -w "%{time_total}\n" -o /dev/null "$URL" 2>&1)
 	# if [ $? -eq 0 ];then
 	#     _speed=$(echo  128*1024*8/$_time_total|bc)
