@@ -177,7 +177,7 @@ _test_speed() {
 		fi
 	fi
 	rm $tmp
-	if [ ! -f "$_ff" ]; then
+	if [ -f "$_ff" ]; then
 		cat $_ff
 	fi
 }
