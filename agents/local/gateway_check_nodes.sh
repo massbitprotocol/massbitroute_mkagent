@@ -188,16 +188,16 @@ _test_speed() {
 	_id=$2
 	_ff=/tmp/test_speed_$_id
 
-	if [ -f "$_ff" ]; then
-		_cont=$(cat $_ff)
-		if [ -z "$_cont" ]; then
-			rm $_ff
-		else
-			cat $_ff
-		fi
+	# if [ -f "$_ff" ]; then
+	# 	_cont=$(cat $_ff)
+	# 	if [ -z "$_cont" ]; then
+	# 		rm $_ff
+	# 	else
+	# 		cat $_ff
+	# 	fi
 
-		return
-	fi
+	# 	return
+	# fi
 	tmp=$(mktemp)
 	_tm=5
 	_tm1=$((_tm - 1))
@@ -210,7 +210,9 @@ _test_speed() {
 		fi
 	fi
 	rm $tmp
-	cat $_ff
+	if [ ! -f "$_ff" ]; then
+		cat $_ff
+	fi
 }
 
 if [ $# -gt 0 ]; then
