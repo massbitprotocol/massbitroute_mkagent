@@ -155,18 +155,17 @@ _test_speed() {
 	_id=$2
 	_ff=/tmp/test_speed_$_id
 
-	# if [ -f "$_ff" ]; then
-	# 	_cont=$(cat $_ff)
-	# 	if [ -z "$_cont" ]; then
-	# 		rm $_ff
-	# 	else
-	# 		cat $_ff
-	# 	fi
-
-	# 	return
-	# fi
+	if [ -f "$_ff" ]; then
+		_cont=$(cat $_ff)
+		if [ -z "$_cont" ]; then
+			rm $_ff
+		else
+			cat $_ff
+		fi
+		return
+	fi
 	tmp=$(mktemp)
-	_tm=5
+	_tm=15
 	_tm1=$((_tm - 1))
 	timeout $_tm wget -O $tmp --no-check-certificate https://$_ip/__log/128M
 	if [ $? -eq 0 ]; then
