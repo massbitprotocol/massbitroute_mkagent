@@ -173,7 +173,7 @@ _test_speed() {
 		_size=$(stat --printf="%s" $tmp)
 		if [ $_size -gt 0 ]; then
 			_speed=$(expr $_size / $_tm1 / 1024)
-			echo "0 mbr-node-speed-${_id} speed=$_speed speed is $_speed KB/s ip=$_ip" >$_ff
+			echo "0 mbr-node-speed${_id} speed=$_speed speed is $_speed KB/s ip=$_ip" >$_ff
 		fi
 	fi
 	rm $tmp
@@ -201,7 +201,7 @@ _node_check_geo() {
 			_domain="${_id}.node.mbr.$DOMAIN"
 			_http $_domain $_ip $_port $_path $_token $_blockchain mbr-node${_type}-$_id
 			_http $_ip $_ip $_port $_path_ping $_token $_blockchain mbr-node${_type}-${_id}-ping GET
-			_test_speed $_ip ${_continent}-${_country}-${_id} >>$tmp
+			_test_speed $_ip ${_type}-$_id >>$tmp
 		done
 	done
 }
