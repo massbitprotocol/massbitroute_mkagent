@@ -159,12 +159,11 @@ _test_speed() {
 		_cont=$(cat $_ff)
 		if [ -z "$_cont" ]; then
 			rm $_ff
+		else
+			cat $_ff
+			return
 		fi
 
-		# else
-		# 	cat $_ff
-		# fi
-		# return
 	fi
 	tmp=$(mktemp)
 	_tm=15
