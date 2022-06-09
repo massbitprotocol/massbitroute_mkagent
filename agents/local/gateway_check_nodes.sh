@@ -149,39 +149,6 @@ _http_api() {
 		# _http $_domain $_ip $_port $_path $_token $_blockchain mbr-api POST "domain=$_domain"
 	fi
 }
-_node_check_geo() {
-	_tmpd=$1
-	_type=$2
-
-	for _ss in 0-1 1-1; do
-		_listid=listid-${_blockchain}-${_network}${_type}-$_ss
-		timeout 3 curl -skL https://portal.$DOMAIN/deploy/info/node/$_listid >/tmp/$_listid
-		if [ $? -ne 0 ]; then continue; fi
-		echo >>/tmp/$_listid
-		cat /tmp/$_listid | while read _id _user _block _net _ip _continent _country _token _status _approve _remain; do
-			if [ -z "$_id" ]; then continue; fi
-			if [ -f "$_tmpd/$_id" ]; then continue; fi
-			touch $_tmpd/$_id
-			_path="/"
-			_path_ping="/_ping"
-			_port=443
-			_domain="${_id}.node.mbr.$DOMAIN"
-			_http $_domain $_ip $_port $_path $_token $_blockchain mbr-node${_type}-$_id
-			_http $_ip $_ip $_port $_path_ping $_token $_blockchain mbr-node${_type}-${_id}-ping GET
-			#		_test_speed $_ip ${_continent}-${_country}-${_id} >>$tmp
-		done
-	done
-}
-_node_check() {
-	_node_check_dir=$(mktemp -d)
-	_type="-${_continent}-${_country}"
-	_node_check_geo $_node_check_dir $_type
-	_type="-${_continent}"
-	_node_check_geo $_node_check_dir $_type
-	_type=""
-	_node_check_geo $_node_check_dir $_type
-	rm -rf $_node_check_dir
-}
 _test_speed() {
 
 	_ip=$1
@@ -213,6 +180,40 @@ _test_speed() {
 	if [ ! -f "$_ff" ]; then
 		cat $_ff
 	fi
+}
+
+_node_check_geo() {
+	_tmpd=$1
+	_type=$2
+
+	for _ss in 0-1 1-1; do
+		_listid=listid-${_blockchain}-${_network}${_type}-$_ss
+		timeout 3 curl -skL https://portal.$DOMAIN/deploy/info/node/$_listid >/tmp/$_listid
+		if [ $? -ne 0 ]; then continue; fi
+		echo >>/tmp/$_listid
+		cat /tmp/$_listid | while read _id _user _block _net _ip _continent _country _token _status _approve _remain; do
+			if [ -z "$_id" ]; then continue; fi
+			if [ -f "$_tmpd/$_id" ]; then continue; fi
+			touch $_tmpd/$_id
+			_path="/"
+			_path_ping="/_ping"
+			_port=443
+			_domain="${_id}.node.mbr.$DOMAIN"
+			_http $_domain $_ip $_port $_path $_token $_blockchain mbr-node${_type}-$_id
+			_http $_ip $_ip $_port $_path_ping $_token $_blockchain mbr-node${_type}-${_id}-ping GET
+			_test_speed $_ip ${_continent}-${_country}-${_id} >>$tmp
+		done
+	done
+}
+_node_check() {
+	_node_check_dir=$(mktemp -d)
+	_type="-${_continent}-${_country}"
+	_node_check_geo $_node_check_dir $_type
+	_type="-${_continent}"
+	_node_check_geo $_node_check_dir $_type
+	_type=""
+	_node_check_geo $_node_check_dir $_type
+	rm -rf $_node_check_dir
 }
 
 if [ $# -gt 0 ]; then
