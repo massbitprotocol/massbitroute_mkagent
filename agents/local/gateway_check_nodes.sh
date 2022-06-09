@@ -188,42 +188,27 @@ _test_speed() {
 	_id=$2
 	_ff=/tmp/test_speed_$_id
 
-	# if [ -f "$_ff" ]; then
-	# 	_cont=$(cat $_ff)
-	# 	if [ -z "$_cont" ]; then
-	# 		rm $_ff
-	# 	else
-	# 		cat $_ff
-	# 	fi
+	if [ -f "$_ff" ]; then
+		_cont=$(cat $_ff)
+		if [ -z "$_cont" ]; then
+			rm $_ff
+		else
+			cat $_ff
+		fi
 
-	# 	return
-	# fi
-	tmp=$(mktemp)
-	URL=https://$_ip/__log/128M
-	_tm=5
-	_time_total=$(timeout $_tm curl -k -s -w "%{time_total}\n" -o /dev/null "$URL" 2>&1)
-	# if [ $? -eq 0 ];then
-	#     _speed=$(echo  128*1024*8/$_time_total|bc)
-	# fi
-
-	# timeout 5 wget -O $tmp --no-check-certificate https://$_ip/__log/128M
-	if [ $? -ne 0 ]; then
-		echo "2 mbr-node-speed-${_id} speed=0 Timeout $_tm seconds  ip=$_ip" >$_ff
-		# rm $tmp
-		# return
-	else
-		_speed=$(echo 128*1024*8/$_time_total | bc)
-		echo "0 mbr-node-speed-${_id} speed=$_speed speed is $_speed KB/s ip=$_ip" >$_ff
-		# cat $_ff
+		return
 	fi
-	# _size=$(stat --printf="%s" $tmp)
-	# if [ $_size -gt 0 ]; then
-	# 	_speed=$(expr $_size / 4 / 1024)
-	# 	_speed=$(echo 128*1024*8/$_time_total | bc)
-	# 	echo "0 mbr-node-speed-${_id} speed=$_speed speed is $_speed KB/s ip=$_ip" >$_ff
-	# 	cat $_ff
-	# fi
-
+	tmp=$(mktemp)
+	_tm=5
+	_tm1=$((_tm - 1))
+	timeout $_tm wget -O $tmp --no-check-certificate https://$_ip/__log/128M
+	if [ $? -eq 0 ]; then
+		_size=$(stat --printf="%s" $tmp)
+		if [ $_size -gt 0 ]; then
+			_speed=$(expr $_size / $_tm1 / 1024)
+			echo "0 mbr-node-speed-${_id} speed=$_speed speed is $_speed KB/s ip=$_ip" >$_ff
+		fi
+	fi
 	rm $tmp
 	cat $_ff
 }
