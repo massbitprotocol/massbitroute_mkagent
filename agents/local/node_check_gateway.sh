@@ -85,8 +85,9 @@ _node_check_geo() {
 			_path_ping="/_nodeip/$_myip/_ping"
 			_port=443
 			_domain="$_id.gw.mbr.$DOMAIN"
-			_http $_domain $_ip $_port $_path $_token $_blockchain mbr-gateway${_type}-$_id             #>>$tmp
-			_http $_ip $_ip $_port $_path_ping $_token $_blockchain mbr-gateway${_type}-${_id}-ping GET #>>$tmp
+			_info="geo={_continent}-${_country}"
+			_http $_domain $_ip $_port $_path $_token $_blockchain mbr-gateway-$_id POST $_info
+			_http $_ip $_ip $_port $_path_ping $_token $_blockchain mbr-gateway-${_id}-ping GET $_info
 		done
 	done
 
@@ -111,7 +112,7 @@ if [ $cache -ne 1 ]; then
 	exit 0
 fi
 mbr=$SITE_ROOT/mbr
-if [ -f "$mbr" ];then $mbr node nodeinfo;fi
+if [ -f "$mbr" ]; then $mbr node nodeinfo; fi
 
 tmp=$(mktemp)
 echo "0 node_info - hostname=$(hostname) status=${_status} operateStatus=${_opstatus} type=$type ip=$_myip id=$_node_id blockchain=$_blockchain network=$_network continent=$_continent country=$_country" >>$tmp
