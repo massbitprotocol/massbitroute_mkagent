@@ -8,11 +8,13 @@ if [ -f "$SITE_ROOT/.env_raw" ]; then
 	source $SITE_ROOT/.env_raw >/dev/null
 fi
 
-check_http="/usr/lib/nagios/plugins/check_http"
-if [ ! -f "$check_http" ]; then
-	apt install -y monitoring-plugins
-fi
+check_dns="/massbit/massbitroute/app/src/sites/services/mkagent/plugins/check_dns"
+check_http="/massbit/massbitroute/app/src/sites/services/mkagent/plugins/check_http"
+# if [ ! -f "$check_http" ]; then
+# 	apt install -y monitoring-plugins
+# fi
 if [ ! -f "/usr/bin/wget" ]; then apt install -y wget; fi
+
 _cache_f=/tmp/${type}_check_nodes
 cache=$1
 if [ -z "$cache" ]; then cache=0; fi
@@ -147,6 +149,13 @@ _http_api() {
 	# _token="empty"
 	if [ -n "$_domain" ]; then
 		_http_api_check $_domain $_path
+
+		_checkname="dns_8.8.8.8"
+		$check_dns -H $_domain -s 8.8.8.8 | awk -F'|' -v checkname=$_checkname -v msg="$_msg" '{st=0;perf="-";if(index($1,"CRITICAL") != 0){st=2} else if(index($1,"WARNING") != 0){st=1} else {gsub(/ /,"|",$2);perf=$2;};print st,checkname,perf,$1,msg}'
+		_checkname="dns_ns1"
+		$check_dns -H $_domain -s ns1.$DOMAIN | awk -F'|' -v checkname=$_checkname -v msg="$_msg" '{st=0;perf="-";if(index($1,"CRITICAL") != 0){st=2} else if(index($1,"WARNING") != 0){st=1} else {gsub(/ /,"|",$2);perf=$2;};print st,checkname,perf,$1,msg}'
+		_checkname="dns_ns2"
+		$check_dns -H $_domain -s ns2.$DOMAIN | awk -F'|' -v checkname=$_checkname -v msg="$_msg" '{st=0;perf="-";if(index($1,"CRITICAL") != 0){st=2} else if(index($1,"WARNING") != 0){st=1} else {gsub(/ /,"|",$2);perf=$2;};print st,checkname,perf,$1,msg}'
 		# _http $_domain $_ip $_port $_path $_token $_blockchain mbr-api POST "domain=$_domain"
 	fi
 }
