@@ -154,20 +154,20 @@ _http_api() {
 
 		_h=$(awk '/nameserver/{print $2}' /etc/resolv.conf | head -1)
 		_checkname="dns_$_h"
-		_msg="domain=$_domain ip=$_h"
+		_msg=""
 		$check_dns -H $_domain | awk -F'|' -v checkname=$_checkname -v msg="$_msg" '{st=0;perf="-";if(index($1,"CRITICAL") != 0){st=2} else if(index($1,"WARNING") != 0){st=1} else {gsub(/ /,"|",$2);perf=$2;};print st,checkname,perf,$1,msg}'
 
 		for _h in 76.76.19.19 185.228.168.9 1.1.1.1 8.8.8.8 9.9.9.9 208.67.222.222; do
 			_checkname="dns_$_h"
-			_msg="domain=$_domain ip=$_h"
+			# _msg="domain=$_domain ip=$_h"
 			$check_dns -H $_domain -s $_h | awk -F'|' -v checkname=$_checkname -v msg="$_msg" '{st=0;perf="-";if(index($1,"CRITICAL") != 0){st=2} else if(index($1,"WARNING") != 0){st=1} else {gsub(/ /,"|",$2);perf=$2;};print st,checkname,perf,$1,msg}'
 		done
 
 		_checkname="dns_ns1"
-		_msg="domain=$_domain"
+		# _msg="domain=$_domain"
 		$check_dns -H $_domain -s ns1.$DOMAIN | awk -F'|' -v checkname=$_checkname -v msg="$_msg" '{st=0;perf="-";if(index($1,"CRITICAL") != 0){st=2} else if(index($1,"WARNING") != 0){st=1} else {gsub(/ /,"|",$2);perf=$2;};print st,checkname,perf,$1,msg}'
 		_checkname="dns_ns2"
-		_msg="domain=$_domain"
+		# _msg="domain=$_domain"
 		$check_dns -H $_domain -s ns2.$DOMAIN | awk -F'|' -v checkname=$_checkname -v msg="$_msg" '{st=0;perf="-";if(index($1,"CRITICAL") != 0){st=2} else if(index($1,"WARNING") != 0){st=1} else {gsub(/ /,"|",$2);perf=$2;};print st,checkname,perf,$1,msg}'
 		# _http $_domain $_ip $_port $_path $_token $_blockchain mbr-api POST "domain=$_domain"
 	fi
