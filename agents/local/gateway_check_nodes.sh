@@ -157,7 +157,7 @@ _http_api() {
 		_msg=""
 		$check_dns -H $_domain | awk -F'|' -v checkname=$_checkname -v msg="$_msg" '{st=0;perf="-";if(index($1,"CRITICAL") != 0){st=2} else if(index($1,"WARNING") != 0){st=1} else {gsub(/ /,"|",$2);perf=$2;};print st,checkname,perf,$1,msg}'
 
-		for _h in 76.76.19.19 185.228.168.9 1.1.1.1 8.8.8.8 9.9.9.9 208.67.222.222; do
+		for _h in 185.228.168.9 1.1.1.1 8.8.8.8 9.9.9.9 208.67.222.222; do
 			_checkname="dns_$_h"
 			# _msg="domain=$_domain ip=$_h"
 			$check_dns -H $_domain -s $_h | awk -F'|' -v checkname=$_checkname -v msg="$_msg" '{st=0;perf="-";if(index($1,"CRITICAL") != 0){st=2} else if(index($1,"WARNING") != 0){st=1} else {gsub(/ /,"|",$2);perf=$2;};print st,checkname,perf,$1,msg}'
