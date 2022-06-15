@@ -156,21 +156,10 @@ _http_api() {
 		_checkname="dns_$_h"
 		$check_dns -H $_domain | awk -F'|' -v checkname=$_checkname -v msg="$_msg" '{st=0;perf="-";if(index($1,"CRITICAL") != 0){st=2} else if(index($1,"WARNING") != 0){st=1} else {gsub(/ /,"|",$2);perf=$2;};print st,checkname,perf,$1,msg}'
 
-		_h=1.1.1.1
-		_checkname="dns_$_h"
-		$check_dns -H $_domain -s $_h | awk -F'|' -v checkname=$_checkname -v msg="$_msg" '{st=0;perf="-";if(index($1,"CRITICAL") != 0){st=2} else if(index($1,"WARNING") != 0){st=1} else {gsub(/ /,"|",$2);perf=$2;};print st,checkname,perf,$1,msg}'
-
-		_h=8.8.8.8
-		_checkname="dns_$_h"
-		$check_dns -H $_domain -s $_h | awk -F'|' -v checkname=$_checkname -v msg="$_msg" '{st=0;perf="-";if(index($1,"CRITICAL") != 0){st=2} else if(index($1,"WARNING") != 0){st=1} else {gsub(/ /,"|",$2);perf=$2;};print st,checkname,perf,$1,msg}'
-
-		_h=9.9.9.9
-		_checkname="dns_$_h"
-		$check_dns -H $_domain -s $_h | awk -F'|' -v checkname=$_checkname -v msg="$_msg" '{st=0;perf="-";if(index($1,"CRITICAL") != 0){st=2} else if(index($1,"WARNING") != 0){st=1} else {gsub(/ /,"|",$2);perf=$2;};print st,checkname,perf,$1,msg}'
-
-		_h=208.67.222.222
-		_checkname="dns_$_h"
-		$check_dns -H $_domain -s $_h | awk -F'|' -v checkname=$_checkname -v msg="$_msg" '{st=0;perf="-";if(index($1,"CRITICAL") != 0){st=2} else if(index($1,"WARNING") != 0){st=1} else {gsub(/ /,"|",$2);perf=$2;};print st,checkname,perf,$1,msg}'
+		for _h in 76.76.19.19 185.228.168.9 1.1.1.1 8.8.8.8 9.9.9.9 208.67.222.222; do
+			_checkname="dns_$_h"
+			$check_dns -H $_domain -s $_h | awk -F'|' -v checkname=$_checkname -v msg="$_msg" '{st=0;perf="-";if(index($1,"CRITICAL") != 0){st=2} else if(index($1,"WARNING") != 0){st=1} else {gsub(/ /,"|",$2);perf=$2;};print st,checkname,perf,$1,msg}'
+		done
 
 		_checkname="dns_ns1"
 		$check_dns -H $_domain -s ns1.$DOMAIN | awk -F'|' -v checkname=$_checkname -v msg="$_msg" '{st=0;perf="-";if(index($1,"CRITICAL") != 0){st=2} else if(index($1,"WARNING") != 0){st=1} else {gsub(/ /,"|",$2);perf=$2;};print st,checkname,perf,$1,msg}'
