@@ -150,11 +150,28 @@ _http_api() {
 	if [ -n "$_domain" ]; then
 		_http_api_check $_domain $_path
 
+		_http $_domain $_ip $_port $_path $_token $_blockchain mbr-api-$_ip POST "domain=$_domain id=$_id $__info"
+
 		_h=$(awk '/nameserver/{print $2}' /etc/resolv.conf | head -1)
 		_checkname="dns_$_h"
 		$check_dns -H $_domain | awk -F'|' -v checkname=$_checkname -v msg="$_msg" '{st=0;perf="-";if(index($1,"CRITICAL") != 0){st=2} else if(index($1,"WARNING") != 0){st=1} else {gsub(/ /,"|",$2);perf=$2;};print st,checkname,perf,$1,msg}'
-		_checkname="dns_8.8.8.8"
-		$check_dns -H $_domain -s 8.8.8.8 | awk -F'|' -v checkname=$_checkname -v msg="$_msg" '{st=0;perf="-";if(index($1,"CRITICAL") != 0){st=2} else if(index($1,"WARNING") != 0){st=1} else {gsub(/ /,"|",$2);perf=$2;};print st,checkname,perf,$1,msg}'
+
+		_h=1.1.1.1
+		_checkname="dns_$_h"
+		$check_dns -H $_domain -s $_h | awk -F'|' -v checkname=$_checkname -v msg="$_msg" '{st=0;perf="-";if(index($1,"CRITICAL") != 0){st=2} else if(index($1,"WARNING") != 0){st=1} else {gsub(/ /,"|",$2);perf=$2;};print st,checkname,perf,$1,msg}'
+
+		_h=8.8.8.8
+		_checkname="dns_$_h"
+		$check_dns -H $_domain -s $_h | awk -F'|' -v checkname=$_checkname -v msg="$_msg" '{st=0;perf="-";if(index($1,"CRITICAL") != 0){st=2} else if(index($1,"WARNING") != 0){st=1} else {gsub(/ /,"|",$2);perf=$2;};print st,checkname,perf,$1,msg}'
+
+		_h=9.9.9.9
+		_checkname="dns_$_h"
+		$check_dns -H $_domain -s $_h | awk -F'|' -v checkname=$_checkname -v msg="$_msg" '{st=0;perf="-";if(index($1,"CRITICAL") != 0){st=2} else if(index($1,"WARNING") != 0){st=1} else {gsub(/ /,"|",$2);perf=$2;};print st,checkname,perf,$1,msg}'
+
+		_h=208.67.222.222
+		_checkname="dns_$_h"
+		$check_dns -H $_domain -s $_h | awk -F'|' -v checkname=$_checkname -v msg="$_msg" '{st=0;perf="-";if(index($1,"CRITICAL") != 0){st=2} else if(index($1,"WARNING") != 0){st=1} else {gsub(/ /,"|",$2);perf=$2;};print st,checkname,perf,$1,msg}'
+
 		_checkname="dns_ns1"
 		$check_dns -H $_domain -s ns1.$DOMAIN | awk -F'|' -v checkname=$_checkname -v msg="$_msg" '{st=0;perf="-";if(index($1,"CRITICAL") != 0){st=2} else if(index($1,"WARNING") != 0){st=1} else {gsub(/ /,"|",$2);perf=$2;};print st,checkname,perf,$1,msg}'
 		_checkname="dns_ns2"
