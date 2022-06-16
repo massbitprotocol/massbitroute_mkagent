@@ -76,7 +76,7 @@ _http() {
 	_method=$8
 	_info=$9
 	_msg="$_info ip=$_ip"
-	if [ \( "$_path" == "/ping" \) -o \( "$_path" == "/_ping" \) ]; then
+	if [ \( "$_path" != "/ping" \) -a \( "$_path" != "/_ping" \) ]; then
 		_rrt="$(timeout 3 curl -sk https://$_ip/_rrt)"
 		_rrt_w=$(echo $_rrt | wc -w)
 		if [ $_rrt_w -ne 1 ]; then _rrt=0; fi
