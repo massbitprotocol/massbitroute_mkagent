@@ -65,18 +65,24 @@ _http() {
 	_idd=$(echo $_hostname | cut -d'.' -f1)
 	_ip=$2
 	if [ "$_ip" == "443" ]; then return; fi
-	_rrt="$(timeout 3 curl -sk https://$_ip/_rrt)"
-	_rrt_w=$(echo $_rrt | wc -w)
 
-	if [ $_rrt_w -ne 1 ]; then _rrt=0; fi
 	_port=$3
 	_path=$4
+	_rrt=0
+
 	_token=$5
 	_blockchain=$6
 	_checkname=$7
 	_method=$8
 	_info=$9
-	_msg="$_info ip=$_ip rrt=$_rrt"
+	_msg="$_info ip=$_ip"
+	if [ \( "$_path" == "/ping" \) -o \( "$_path" == "/_ping" \) ]; then
+		_rrt="$(timeout 3 curl -sk https://$_ip/_rrt)"
+		_rrt_w=$(echo $_rrt | wc -w)
+		if [ $_rrt_w -ne 1 ]; then _rrt=0; fi
+		_msg="$_msg rrt=$_rrt"
+	fi
+
 	if [ -z "$_method" ]; then _method=POST; fi
 	if [ -z "$_checkname" ]; then
 		_checkname="mbr-node-$_idd"
@@ -84,14 +90,14 @@ _http() {
 	if [ "$_method" == "POST" ]; then
 		if [ "$_blockchain" == "dot" ]; then
 			$check_http -I $_ip -H $_hostname -k "x-api-key: $_token" -u $_path -T application/json --method=POST --post='{"jsonrpc":"2.0","method":"chain_getBlock","params": [],"id": 1}' -t $_timeout --ssl -p $_port | tail -1 |
-				awk -F'|' -v rrt=$_rrt -v checkname=$_checkname -v msg="$_msg" '{st=0;perf="-";if(index($1,"CRITICAL") != 0){st=2} else if(index($1,"WARNING") != 0){st=1} else {gsub(/ /,"|",$2);perf=$2;};print st,checkname,perf"|rrt="rrt,$1,msg}'
+				awk -F'|' -v rrt=$_rrt -v checkname=$_checkname -v msg="$_msg" '{st=0;perf="-";if(index($1,"CRITICAL") != 0){st=2} else if(index($1,"WARNING") != 0){st=1} else {gsub(/ /,"|",$2);perf=$2;};rrt_msg="";if(rrt>0){rrt_msg="|rrt="rrt};print st,checkname,perf""rrt_msg,$1,msg}'
 		else
 			$check_http -I $_ip -H $_hostname -k "x-api-key: $_token" -u $_path -T application/json --method=POST --post='{"id": "blockNumber", "jsonrpc": "2.0", "method": "eth_getBlockByNumber", "params": ["latest", false]}' -t $_timeout --ssl -p $_port | tail -1 |
-				awk -F'|' -v rrt=$_rrt -v checkname=$_checkname -v msg="$_msg" '{st=0;perf="-";if(index($1,"CRITICAL") != 0){st=2} else if(index($1,"WARNING") != 0){st=1} else {gsub(/ /,"|",$2);perf=$2;};print st,checkname,perf"|rrt="rrt,$1,msg}'
+				awk -F'|' -v rrt=$_rrt -v checkname=$_checkname -v msg="$_msg" '{st=0;perf="-";if(index($1,"CRITICAL") != 0){st=2} else if(index($1,"WARNING") != 0){st=1} else {gsub(/ /,"|",$2);perf=$2;};rrt_msg="";if(rrt>0){rrt_msg="|rrt="rrt};print st,checkname,perf""rrt_msg,$1,msg}'
 		fi
 	elif [ "$_method" == "GET" ]; then
 		$check_http -I $_ip -H $_hostname -k "x-api-key: $_token" -u $_path -T application/json --method=GET -t $_timeout --ssl -p $_port | tail -1 |
-			awk -F'|' -v rrt=$_rrt -v checkname=$_checkname -v msg="$_msg" '{st=0;perf="-";if(index($1,"CRITICAL") != 0){st=2} else if(index($1,"WARNING") != 0){st=1} else {gsub(/ /,"|",$2);perf=$2;};print st,checkname,perf"|rrt="rrt,$1,msg}'
+			awk -F'|' -v rrt=$_rrt -v checkname=$_checkname -v msg="$_msg" '{st=0;perf="-";if(index($1,"CRITICAL") != 0){st=2} else if(index($1,"WARNING") != 0){st=1} else {gsub(/ /,"|",$2);perf=$2;};rrt_msg="";if(rrt>0){rrt_msg="|rrt="rrt};print st,checkname,perf""rrt_msg,$1,msg}'
 	fi
 
 }
