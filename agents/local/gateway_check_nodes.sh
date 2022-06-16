@@ -66,7 +66,9 @@ _http() {
 	_ip=$2
 	if [ "$_ip" == "443" ]; then return; fi
 	_rrt=$(timeout 3 curl -sk https://$_ip/_rrt)
-	if [ $? -ne 0 ]; then _rrt=0; fi
+	_rrt_w=$(echo $_rrt | wc -w)
+
+	if [ $_rrt_w -ne 1 ]; then _rrt=0; fi
 	_port=$3
 	_path=$4
 	_token=$5
