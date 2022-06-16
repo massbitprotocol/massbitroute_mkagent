@@ -65,7 +65,7 @@ _http() {
 	_idd=$(echo $_hostname | cut -d'.' -f1)
 	_ip=$2
 	if [ "$_ip" == "443" ]; then return; fi
-	_rrt=$(timeout 3 curl https://$_ip/_rrt)
+	_rrt=$(timeout 3 curl -sk https://$_ip/_rrt)
 	if [ $? -ne 0 ]; then _rrt=0; fi
 	_port=$3
 	_path=$4
