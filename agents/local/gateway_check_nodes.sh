@@ -64,6 +64,10 @@ _http() {
 
 	_idd=$(echo $_hostname | cut -d'.' -f1)
 	_ip=$2
+	if [ "$_ip" == "null" ]; then
+		_ip=$(nslookup -type=A $_hostname | awk '/Address:/{print $2}' | tail -2 | head -1)
+	fi
+
 	if [ "$_ip" == "443" ]; then return; fi
 
 	_port=$3
@@ -150,7 +154,8 @@ _http_api_check() {
 }
 _http_api() {
 	_f=$(ls /massbit/massbitroute/app/src/sites/services/gateway/http.d/dapi-*.conf | head -1)
-	_domain=$(awk -v blockchain=$_blockchain -v network=$_network -v domain=$DOMAIN '/server_name/{sub(/*;$/,blockchain"-"network"."domain,$2);print $2}' $_f | head -1)
+	_suff=${_blockchain}"-"${_network}"."$DOMAIN
+	_domain=$(awk -v suff=$_suff '/server_name/{sub(/*;$/,suff,$2);print $2}' $_f | head -1)
 	_path=$(awk '/location \/[^ ]/{print $2}' $_f | head -1)
 	# _port=443
 	# _ip=$(nslookup -type=A $_domain | awk '/Address:/{print $2}' | tail -2 | head -1)
@@ -160,8 +165,11 @@ _http_api() {
 	if [ -n "$_domain" ]; then
 		_http_api_check $_domain $_path
 
-		_http $_domain $_ip $_port $_path $_token $_blockchain mbr-api-$_ip POST "domain=$_domain id=$_id $__info"
-
+		_http $_domain null $_port $_path $_token $_blockchain mbr-api-$_ip POST "domain=$_domain id=$_id $__info"
+		_domain1=$(echo $_domain | sed "s/$_suff/${_suff}-${_continent}/g")
+		_http $_domain1 null $_port $_path $_token $_blockchain mbr-api-$_ip-${_continent} POST "domain=$_domain id=$_id geo=${_continent} $__info "
+		_domain2=$(echo $_domain | sed "s/$_suff/${_suff}-${_continent}-${_country}/g")
+		_http $_domain2 null $_port $_path $_token $_blockchain mbr-api-$_ip-${_continent}-${_country} POST "domain=$_domain id=$_id geo=${_continent}-${_country} $__info"
 		_h=$(awk '/nameserver/{print $2}' /etc/resolv.conf | head -1)
 		_checkname="dns_$_h"
 		_msg=""
