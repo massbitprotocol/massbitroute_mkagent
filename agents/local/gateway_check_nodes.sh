@@ -158,7 +158,7 @@ _http_api() {
 	_domain=$(awk -v suff=$_suff '/server_name/{sub(/*;$/,suff,$2);print $2}' $_f | head -1)
 	_path=$(awk '/location \/[^ ]/{print $2}' $_f | head -1)
 	# _port=443
-	# _ip=$(nslookup -type=A $_domain | awk '/Address:/{print $2}' | tail -2 | head -1)
+	_ip_google=$(nslookup -type=A $_domain 8.8.8.8 | awk '/Address:/{print $2}' | tail -2 | head -1)
 	# _ip=$(host $_domain | awk '{print $4}' | head -1)
 	#	_ip="127.0.0.1"
 	# _token="empty"
@@ -166,7 +166,7 @@ _http_api() {
 
 		#_http_api_check $_domain $_path
 
-		_http $_domain null $_port $_path $_token $_blockchain mbr-api-$_ip POST "domain=$_domain id=$_id $__info"
+		_http $_domain _ip_google $_port $_path $_token $_blockchain mbr-api-${_ip}-google POST "domain=$_domain id=$_id $__info"
 		_domain1=$(echo $_domain | sed "s/$_suff/${_suff}-${_continent}/g")
 		_http $_domain1 null $_port $_path $_token $_blockchain mbr-api-$_ip-${_continent} POST "domain=$_domain id=$_id geo=${_continent} $__info "
 		_domain2=$(echo $_domain | sed "s/$_suff/${_suff}-${_continent}-${_country}/g")
