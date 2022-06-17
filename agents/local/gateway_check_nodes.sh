@@ -166,7 +166,7 @@ _http_api() {
 
 	# _ip=$(host $_domain | awk '{print $4}' | head -1)
 	#	_ip="127.0.0.1"
-	# _token="empty"
+	_token="empty"
 	if [ -n "$_domain" ]; then
 
 		#_http_api_check $_domain $_path
