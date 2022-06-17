@@ -65,7 +65,9 @@ _http() {
 	_idd=$(echo $_hostname | cut -d'.' -f1)
 	_ip=$2
 	if [ "$_ip" == "null" ]; then
-		_ip=$(nslookup -type=A $_hostname | awk '/Address:/{print $2}' | tail -2 | head -1)
+		_ip=$(nslookup -type=A $_hostname 8.8.8.8 | awk -F':' '/^Address: / { matched = 1 } matched { print $2}' | xargs)
+
+		# _ip=$(nslookup -type=A $_hostname | awk '/Address:/{print $2}' | tail -2 | head -1)
 	fi
 
 	if [ "$_ip" == "443" ]; then return; fi
@@ -171,9 +173,9 @@ _http_api() {
 
 		_http $_domain $_ip_google $_port $_path $_token $_blockchain mbr-api-${_ip_google}-google POST "domain=$_domain id=$_id $__info"
 		_domain1=$(echo $_domain | sed "s/$_suff/${_suff}-${_continent}/g").$DOMAIN
-		_http $_domain1 null $_port $_path $_token $_blockchain mbr-api-$_ip-${_continent} POST "domain=$_domain id=$_id geo=${_continent} $__info "
+		_http $_domain1 null $_port $_path $_token $_blockchain mbr-api-${_ip}-${_continent} POST "domain=$_domain id=$_id geo=${_continent} $__info "
 		_domain2=$(echo $_domain | sed "s/$_suff/${_suff}-${_continent}-${_country}/g").$DOMAIN
-		_http $_domain2 null $_port $_path $_token $_blockchain mbr-api-$_ip-${_continent}-${_country} POST "domain=$_domain id=$_id geo=${_continent}-${_country} $__info"
+		_http $_domain2 null $_port $_path $_token $_blockchain mbr-api-$_{ip}-${_continent}-${_country} POST "domain=$_domain id=$_id geo=${_continent}-${_country} $__info"
 
 		# check dns
 		# _h=$(awk '/nameserver/{print $2}' /etc/resolv.conf | head -1)
