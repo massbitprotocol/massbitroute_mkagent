@@ -172,9 +172,9 @@ _http_api() {
 		#_http_api_check $_domain $_path
 
 		_http $_domain $_ip_google $_port $_path $_token $_blockchain mbr-api-${_ip_google}-google POST "domain=$_domain id=$_id $__info"
-		_domain1=$(echo $_domain | sed "s/$_suff/${_suff}-${_continent}/g").$DOMAIN
+		_domain1=$(echo $_domain | sed "s/$_suff/${_suff}-${_continent}/g")
 		_http $_domain1 null $_port $_path $_token $_blockchain mbr-api-${_ip}-${_continent} POST "domain=$_domain id=$_id geo=${_continent} $__info "
-		_domain2=$(echo $_domain | sed "s/$_suff/${_suff}-${_continent}-${_country}/g").$DOMAIN
+		_domain2=$(echo $_domain | sed "s/$_suff/${_suff}-${_continent}-${_country}/g")
 		_http $_domain2 null $_port $_path $_token $_blockchain mbr-api-${_ip}-${_continent}-${_country} POST "domain=$_domain id=$_id geo=${_continent}-${_country} $__info"
 
 		# check dns
