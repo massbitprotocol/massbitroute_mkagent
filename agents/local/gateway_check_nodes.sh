@@ -150,7 +150,7 @@ _http_api_check() {
 }
 _http_api() {
 	_f=$(ls /massbit/massbitroute/app/src/sites/services/gateway/http.d/dapi-*.conf | head -1)
-	_domain=$(awk '/server_name/{sub(/;$/,"",$2);print $2}' $_f | head -1)
+	_domain=$(awk -v blockchain=$_blockchain -v network=$_network -v domain=$DOMAIN '/server_name/{sub(/*;$/,blockchain"-"network"."domain,$2);print $2}' $_f | head -1)
 	_path=$(awk '/location \/[^ ]/{print $2}' $_f | head -1)
 	# _port=443
 	# _ip=$(nslookup -type=A $_domain | awk '/Address:/{print $2}' | tail -2 | head -1)
