@@ -159,7 +159,7 @@ _http_api() {
 	_suff=${_blockchain}"-"${_network}
 	_domain=$(awk -v suff=$_suff '/server_name/{sub(/*;$/,suff,$2);print $2}' $_f | head -1)"."$DOMAIN
 	_path=$(awk '/location \/[^ ]/{print $2}' $_f | head -1)
-	# _port=443
+	_port=443
 	# _ip_google=$(nslookup -type=A $_domain 8.8.8.8 | awk '/Address:/{print $2}' | tail -1)
 
 	_ip_google=$(nslookup -type=A $_domain 8.8.8.8 | awk -F':' '/^Address: / { matched = 1 } matched { print $2}' | xargs)
