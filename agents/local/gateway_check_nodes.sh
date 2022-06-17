@@ -154,8 +154,8 @@ _http_api_check() {
 }
 _http_api() {
 	_f=$(ls /massbit/massbitroute/app/src/sites/services/gateway/http.d/dapi-*.conf | head -1)
-	_suff=${_blockchain}"-"${_network}"."$DOMAIN
-	_domain=$(awk -v suff=$_suff '/server_name/{sub(/*;$/,suff,$2);print $2}' $_f | head -1)
+	_suff=${_blockchain}"-"${_network}
+	_domain=$(awk -v suff=$_suff '/server_name/{sub(/*;$/,suff,$2);print $2}' $_f | head -1)"."$DOMAIN
 	_path=$(awk '/location \/[^ ]/{print $2}' $_f | head -1)
 	# _port=443
 	_ip_google=$(nslookup -type=A $_domain 8.8.8.8 | awk '/Address:/{print $2}' | tail -2 | head -1)
@@ -166,10 +166,10 @@ _http_api() {
 
 		#_http_api_check $_domain $_path
 
-		# _http $_domain _ip_google $_port $_path $_token $_blockchain mbr-api-${_ip_google}-google POST "domain=$_domain id=$_id $__info"
-		_domain1=$(echo $_domain | sed "s/$_suff/${_suff}-${_continent}/g")
+		_http $_domain _ip_google $_port $_path $_token $_blockchain mbr-api-${_ip_google}-google POST "domain=$_domain id=$_id $__info"
+		_domain1=${_suff}-${_continent}.$DOMAIN
 		_http $_domain1 null $_port $_path $_token $_blockchain mbr-api-$_ip-${_continent} POST "domain=$_domain id=$_id geo=${_continent} $__info "
-		_domain2=$(echo $_domain | sed "s/$_suff/${_suff}-${_continent}-${_country}/g")
+		_domain2=${_suff}-${_continent}-${_country}.$DOMAIN
 		_http $_domain2 null $_port $_path $_token $_blockchain mbr-api-$_ip-${_continent}-${_country} POST "domain=$_domain id=$_id geo=${_continent}-${_country} $__info"
 
 		# check dns
