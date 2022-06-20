@@ -133,9 +133,9 @@ _http_api_check_geo() {
 			_port=443
 			_domain="$_dm"
 			_token="empty"
-			__info="geo=${_continent}-${_country}"
-			_http $_domain $_ip $_port $_path $_token $_blockchain mbr-api-$_ip POST "domain=$_domain id=$_id $__info"
-			_http $_domain $_ip $_port $_path_ping $_token $_blockchain mbr-api-${_ip}-ping GET "domain=$_domain id=$_id $__info"
+			__info="group=${_type} geo=${_continent}-${_country} domain=$_domain id=$_id"
+			_http $_domain $_ip $_port $_path $_token $_blockchain mbr-api-$_ip POST "$__info"
+			_http $_domain $_ip $_port $_path_ping $_token $_blockchain mbr-api-${_ip}-ping GET "$__info"
 		done
 	done
 	# cat $_tmp
@@ -169,8 +169,7 @@ _http_api() {
 	_token="empty"
 	if [ -n "$_domain" ]; then
 
-		#_http_api_check $_domain $_path
-
+		#_http_api_check $_domain $_pat
 		_http $_domain $_ip_google $_port $_path $_token $_blockchain mbr-api-${_ip_google}-google POST "domain=$_domain id=$_id $__info"
 		_domain1=$(echo $_domain | sed "s/$_suff/${_suff}-${_continent}/g")
 		_http $_domain1 "null" $_port $_path $_token $_blockchain mbr-api-${_ip}-${_continent} POST "domain=$_domain1 id=$_id geo=${_continent} $__info "
