@@ -249,13 +249,13 @@ _node_check_geo() {
 			touch $_tmpd/$_id
 			_path="/"
 			_path_ping="/_ping"
-			_path_rrt="/_rrt"
+			# _path_rrt="/_rrt"
 			_port=443
 			_domain="${_id}.node.mbr.$DOMAIN"
 			_info="geo=${_continent}-${_country}"
 			_http $_domain $_ip $_port $_path $_token $_blockchain mbr-node-$_id POST $_info
 			_http $_ip $_ip $_port $_path_ping $_token $_blockchain mbr-node-${_id}-ping GET $_info
-			_http $_ip $_ip $_port $_path_rrt $_token $_blockchain mbr-node-${_id}-rrt GET $_info
+			# _http $_ip $_ip $_port $_path_rrt $_token $_blockchain mbr-node-${_id}-rrt GET $_info
 
 			# _test_speed $_ip $_id $_info
 		done
