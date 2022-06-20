@@ -96,14 +96,14 @@ _http() {
 	if [ "$_method" == "POST" ]; then
 		if [ "$_blockchain" == "dot" ]; then
 			$check_http -I $_ip -H $_hostname -k "x-api-key: $_token" -u $_path -T application/json --method=POST --post='{"jsonrpc":"2.0","method":"chain_getBlock","params": [],"id": 1}' -t $_timeout --ssl -p $_port | tail -1 |
-				awk -F'|' -v rtt=$_rtt -v checkname=$_checkname -v msg="$_msg" '{st=0;perf="-";if(index($1,"CRITICAL") != 0){st=2} else if(index($1,"WARNING") != 0){st=1} else {gsub(/ /,"|",$2);perf=$2;};rtt_msg="";if(rtt>0){rtt_msg="|rtt="rtt};print st,checkname,perf""rtt_msg,$1,msg}'
+				awk -F'|' -v rtt=$_rtt -v checkname=$_checkname -v msg="$_msg" '{st=0;perf="size=0|time=0";if(index($1,"CRITICAL") != 0){st=2} else if(index($1,"WARNING") != 0){st=1} else {gsub(/ /,"|",$2);perf=$2;};rtt_msg="";if(rtt>0){rtt_msg="|rtt="rtt};print st,checkname,perf""rtt_msg,$1,msg}'
 		else
 			$check_http -I $_ip -H $_hostname -k "x-api-key: $_token" -u $_path -T application/json --method=POST --post='{"id": "blockNumber", "jsonrpc": "2.0", "method": "eth_getBlockByNumber", "params": ["latest", false]}' -t $_timeout --ssl -p $_port | tail -1 |
-				awk -F'|' -v rtt=$_rtt -v checkname=$_checkname -v msg="$_msg" '{st=0;perf="-";if(index($1,"CRITICAL") != 0){st=2} else if(index($1,"WARNING") != 0){st=1} else {gsub(/ /,"|",$2);perf=$2;};rtt_msg="";if(rtt>0){rtt_msg="|rtt="rtt};print st,checkname,perf""rtt_msg,$1,msg}'
+				awk -F'|' -v rtt=$_rtt -v checkname=$_checkname -v msg="$_msg" '{st=0;perf="size=0|time=0";if(index($1,"CRITICAL") != 0){st=2} else if(index($1,"WARNING") != 0){st=1} else {gsub(/ /,"|",$2);perf=$2;};rtt_msg="";if(rtt>0){rtt_msg="|rtt="rtt};print st,checkname,perf""rtt_msg,$1,msg}'
 		fi
 	elif [ "$_method" == "GET" ]; then
 		$check_http -I $_ip -H $_hostname -k "x-api-key: $_token" -u $_path -T application/json --method=GET -t $_timeout --ssl -p $_port | tail -1 |
-			awk -F'|' -v rtt=$_rtt -v checkname=$_checkname -v msg="$_msg" '{st=0;perf="-";if(index($1,"CRITICAL") != 0){st=2} else if(index($1,"WARNING") != 0){st=1} else {gsub(/ /,"|",$2);perf=$2;};rtt_msg="";if(rtt>0){rtt_msg="|rtt="rtt};print st,checkname,perf""rtt_msg,$1,msg}'
+			awk -F'|' -v rtt=$_rtt -v checkname=$_checkname -v msg="$_msg" '{st=0;perf="size=0|time=0";if(index($1,"CRITICAL") != 0){st=2} else if(index($1,"WARNING") != 0){st=1} else {gsub(/ /,"|",$2);perf=$2;};rtt_msg="";if(rtt>0){rtt_msg="|rtt="rtt};print st,checkname,perf""rtt_msg,$1,msg}'
 	fi
 
 }
