@@ -148,8 +148,8 @@ _http_api_check() {
 	_api_check_dir=$(mktemp -d)
 	_type="-${_continent}-${_country}"
 	_http_api_check_geo $_dm $_pt $_api_check_dir $_type
-	# _type="-${_continent}"
-	# _http_api_check_geo $_dm $_pt $_api_check_dir $_type
+	_type="-${_continent}"
+	_http_api_check_geo $_dm $_pt $_api_check_dir $_type
 	# _type=""
 	# _http_api_check_geo $_dm $_pt $_api_check_dir $_type
 	rm -rf $_api_check_dir
@@ -265,8 +265,8 @@ _node_check() {
 	_node_check_dir=$(mktemp -d)
 	_type="-${_continent}-${_country}"
 	_node_check_geo $_node_check_dir $_type
-	# _type="-${_continent}"
-	# _node_check_geo $_node_check_dir $_type
+	_type="-${_continent}"
+	_node_check_geo $_node_check_dir $_type
 	# _type=""
 	# _node_check_geo $_node_check_dir $_type
 	rm -rf $_node_check_dir
