@@ -70,7 +70,7 @@ _http() {
 		# _ip=$(nslookup -type=A $_hostname | awk '/Address:/{print $2}' | tail -2 | head -1)
 	fi
 
-	if [ "$_ip" == "443" ]; then return; fi
+	# if [ "$_ip" == "443" ]; then return; fi
 
 	_port=$3
 	_path=$4
@@ -80,7 +80,7 @@ _http() {
 	_blockchain=$6
 	_checkname=$7
 	_method=$8
-	_info=$9
+	_info="$9"
 	_msg="$_info ip=$_ip"
 	if [ \( "$_path" != "/ping" \) -a \( "$_path" != "/_ping" \) ]; then
 		_rrt="$(timeout 3 curl -sk https://$_ip/_rrt)"
