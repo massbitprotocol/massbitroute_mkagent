@@ -98,10 +98,10 @@ _node_check() {
 	_node_check_dir=$(mktemp -d)
 	_type="-${_continent}-${_country}"
 	_node_check_geo $_node_check_dir $_type
-	_type="-${_continent}"
-	_node_check_geo $_node_check_dir $_type
-	_type=""
-	_node_check_geo $_node_check_dir $_type
+	# _type="-${_continent}"
+	# _node_check_geo $_node_check_dir $_type
+	# _type=""
+	# _node_check_geo $_node_check_dir $_type
 	rm -rf $_node_check_dir
 }
 cache=$1
