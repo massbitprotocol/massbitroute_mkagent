@@ -167,7 +167,7 @@ _http_api() {
 	# _ip=$(host $_domain | awk '{print $4}' | head -1)
 	#	_ip="127.0.0.1"
 	_token="empty"
-	if [ -n "$_domain" ]; then
+	if [ \( -z "$_ip_google" \) -o \( -n "$_domain" \) ]; then
 
 		#_http_api_check $_domain $_pat
 		_http $_domain $_ip_google $_port $_path $_token $_blockchain mbr-api-google POST "domain=$_domain id=$_id $__info ip=$_ip_google"
