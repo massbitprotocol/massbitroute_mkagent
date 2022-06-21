@@ -251,7 +251,7 @@ _node_check_geo() {
 			# _path_rtt="/_rtt"
 			_port=443
 			_domain="${_id}.node.mbr.$DOMAIN"
-			_info="geo=${_continent}-${_country}"
+			_info="group=$_type geo=${_continent}-${_country}"
 			_http $_domain $_ip $_port $_path $_token $_blockchain mbr-node-$_id POST $_info
 			_http $_ip $_ip $_port $_path_ping $_token $_blockchain mbr-node-${_id}-ping GET $_info
 			# _http $_ip $_ip $_port $_path_rtt $_token $_blockchain mbr-node-${_id}-rtt GET $_info
@@ -266,8 +266,8 @@ _node_check() {
 	_node_check_geo $_node_check_dir $_type
 	_type="-${_continent}"
 	_node_check_geo $_node_check_dir $_type
-	# _type=""
-	# _node_check_geo $_node_check_dir $_type
+	_type=""
+	_node_check_geo $_node_check_dir $_type
 	rm -rf $_node_check_dir
 }
 
