@@ -132,8 +132,8 @@ _http_api_check_geo() {
 			_domain="$_dm"
 			_token="empty"
 			__info="group=${_type} geo=${_continent}-${_country} domain=$_domain ip=$_ip"
-			_http $_domain $_ip $_port $_path $_token $_blockchain mbr-api-$_id POST "$__info"
-			_http $_domain $_ip $_port $_path_ping $_token $_blockchain mbr-api-${_id}-ping GET "$__info"
+			_http $_domain $_ip $_port $_path $_token $_blockchain mbr-api-gateway-$_id POST "$__info"
+			_http $_domain $_ip $_port $_path_ping $_token $_blockchain mbr-api-gateway-${_id}-ping GET "$__info"
 		done
 	done
 	# cat $_tmp
