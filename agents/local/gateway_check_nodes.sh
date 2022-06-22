@@ -119,9 +119,7 @@ _http_api_check_geo() {
 		_listid=listid-${_blockchain}-${_network}${_type}-$_ss
 		timeout 3 curl -skL https://portal.$DOMAIN/deploy/info/gateway/$_listid >/tmp/$_listid
 		if [ $? -ne 0 ]; then
-			# rm $_tmp
 			continue
-			#return
 		fi
 		echo >>/tmp/$_listid
 		cat /tmp/$_listid | while read _id _user _block _net _ip _continent _country _token _status _approve _remain; do
@@ -133,9 +131,9 @@ _http_api_check_geo() {
 			_port=443
 			_domain="$_dm"
 			_token="empty"
-			__info="group=${_type} geo=${_continent}-${_country} domain=$_domain id=$_id"
-			_http $_domain $_ip $_port $_path $_token $_blockchain mbr-api-$_ip POST "$__info"
-			_http $_domain $_ip $_port $_path_ping $_token $_blockchain mbr-api-${_ip}-ping GET "$__info"
+			__info="group=${_type} geo=${_continent}-${_country} domain=$_domain ip=$_ip"
+			_http $_domain $_ip $_port $_path $_token $_blockchain mbr-api-$_id POST "$__info"
+			_http $_domain $_ip $_port $_path_ping $_token $_blockchain mbr-api-${_id}-ping GET "$__info"
 		done
 	done
 	# cat $_tmp
@@ -150,8 +148,8 @@ _http_api_check() {
 	_http_api_check_geo $_dm $_pt $_api_check_dir $_type
 	_type="-${_continent}"
 	_http_api_check_geo $_dm $_pt $_api_check_dir $_type
-	# _type=""
-	# _http_api_check_geo $_dm $_pt $_api_check_dir $_type
+	_type=""
+	_http_api_check_geo $_dm $_pt $_api_check_dir $_type
 	rm -rf $_api_check_dir
 }
 _http_api() {
@@ -170,7 +168,7 @@ _http_api() {
 		__ip=$(nslookup -type=A $_domain 8.8.8.8 | awk -F':' '/^Address: / { matched = 1 } matched { print $2}' | xargs)
 
 		__info="domain=$_domain ip=$__ip"
-		#_http_api_check $_domain $_pat
+
 		_http $_domain $__ip $_port $_path $_token $_blockchain mbr-api-google POST "$__info"
 		_domain1=$(echo $_domain | sed "s/$_suff/${_suff}-${_continent}/g")
 		__ip=$(nslookup -type=A $_domain1 ns1.$DOMAIN | awk -F':' '/^Address: / { matched = 1 } matched { print $2}' | xargs)
@@ -180,6 +178,8 @@ _http_api() {
 		__ip=$(nslookup -type=A $_domain2 ns1.$DOMAIN | awk -F':' '/^Address: / { matched = 1 } matched { print $2}' | xargs)
 		__info="domain=$_domain2 ip=$__ip geo=${_continent}-${_country}"
 		_http $_domain2 "null" $_port $_path $_token $_blockchain mbr-api-${_continent}-${_country} POST "$__info"
+
+		_http_api_check $_domain $_path
 
 		# check dns
 		# _h=$(awk '/nameserver/{print $2}' /etc/resolv.conf | head -1)
