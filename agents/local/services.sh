@@ -11,6 +11,7 @@ fi
 # 	exit 1
 # fi
 
+chmod +x /massbit/massbitroute/app/src/sites/services/$type/bin/openresty/nginx/sbin/nginx
 nginx="/massbit/massbitroute/app/src/sites/services/$type/bin/openresty/nginx/sbin/nginx -c /massbit/massbitroute/app/src/sites/services/$type/tmp/nginx.conf"
 msg="$($nginx -t 2>&1 | tr -s '\n' ' ')"
 st=$?
