@@ -5,6 +5,6 @@ if [ -z "$nginx" ]; then
 	exit 1
 fi
 
-msg="$($nginx -t 2>&1)"
+msg="$($nginx -t 2>&1 | tail -1)"
 st=$?
 echo $st nginx_check - "$msg"
