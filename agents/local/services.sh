@@ -1,5 +1,5 @@
 #!/bin/bash
-nginx="$(ps -ef | awk '/nginx: master process/ {gsub(/^.*nginx: master process/,"");gsub(/nginx.conf.*$/,"nginx.conf");print}' | grep -v print | head -1)"
+nginx="$(ps -ef | awk '/nginx: master process/ {gsub(/^.*nginx: master process/,"");gsub(/nginx.conf.*$/,"nginx.conf");print}' | grep -v awk | head -1)"
 if [ -z "$nginx" ]; then
 	echo $st nginx_check - "nginx process not found"
 	exit 1
