@@ -3,6 +3,10 @@ type=$(supervisorctl status | awk '/mbr_(gateway|node) /{sub(/^mbr_/,"",$1);prin
 if [ "$type" != "gateway" ]; then
 	exit 0
 fi
+if [ ! -f "/usr/bin/nslookup" ]; then
+	apt-get update
+	apt-get install -y dnsutils
+fi
 SITE_ROOT=/massbit/massbitroute/app/src/sites/services/$type
 if [ -f "$SITE_ROOT/.env_raw" ]; then
 	source $SITE_ROOT/.env_raw >/dev/null
