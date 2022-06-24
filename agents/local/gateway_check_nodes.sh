@@ -131,7 +131,7 @@ _http_api_check_geo() {
 			_port=443
 			_domain="$_dm"
 			_token="empty"
-			__info="group=${_type} geo=${_continent}-${_country} domain=$_domain ip=$_ip"
+			__info="group=${_type} geo=${_continent}-${_country} domain=$_domain"
 			_http $_domain $_ip $_port $_path $_token $_blockchain mbr-api-gateway-$_id POST "$__info"
 			# _http $_domain $_ip $_port $_path_ping $_token $_blockchain mbr-api-gateway-${_id}-ping GET "$__info"
 		done
@@ -168,7 +168,7 @@ _http_api() {
 
 		__ip=$(nslookup -type=A $_domain 8.8.8.8 | awk -F':' '/^Address: / { matched = 1 } matched { print $2}' | xargs)
 
-		__info="domain=$_domain ip=$__ip"
+		__info="domain=$_domain"
 
 		_http $_domain $__ip $_port $_path $_token $_blockchain mbr-api-google POST "$__info"
 		_domain1=$(echo $_domain | sed "s/$_suff/${_suff}-${_continent}/g")
