@@ -12,6 +12,6 @@ fi
 # fi
 
 nginx="/massbit/massbitroute/app/src/sites/services/$type/bin/openresty/nginx/sbin/nginx -c /massbit/massbitroute/app/src/sites/services/$type/tmp/nginx.conf"
-msg="$($nginx -t 2>&1 | head -1)"
+msg="$($nginx -t 2>&1 | tr -s '\n' ' ')"
 st=$?
 echo $st nginx_check - "$msg"
