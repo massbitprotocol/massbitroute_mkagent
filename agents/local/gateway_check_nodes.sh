@@ -177,11 +177,11 @@ _http_api() {
 		_http $_domain $__ip $_port $_path $_token $_blockchain mbr-api-google POST "$__info"
 		_domain1=$(echo $_domain | sed "s/$_suff/${_suff}-${_continent}/g")
 		__ip=$(nslookup -type=A $_domain1 ns1.$DOMAIN | awk -F':' '/^Address: / { matched = 1 } matched { print $2}' | xargs)
-		__info="domain=$_domain1 ip=$__ip geo=${_continent}"
+		__info="domain=$_domain1 geo=${_continent}"
 		_http $_domain1 "null" $_port $_path $_token $_blockchain mbr-api-${_continent} POST "$__info "
 		_domain2=$(echo $_domain | sed "s/$_suff/${_suff}-${_continent}-${_country}/g")
 		__ip=$(nslookup -type=A $_domain2 ns1.$DOMAIN | awk -F':' '/^Address: / { matched = 1 } matched { print $2}' | xargs)
-		__info="domain=$_domain2 ip=$__ip geo=${_continent}-${_country}"
+		__info="domain=$_domain2 geo=${_continent}-${_country}"
 		_http $_domain2 "null" $_port $_path $_token $_blockchain mbr-api-${_continent}-${_country} POST "$__info"
 
 		_http_api_check $_domain $_path
