@@ -159,7 +159,7 @@ _http_api_check() {
 _http_api() {
 	_f=$(ls /massbit/massbitroute/app/src/sites/services/gateway/http.d/dapi-*.conf | head -1)
 	_suff=${_blockchain}"-"${_network}
-	_domain=$(awk -v suff=$_suff '/server_name/{sub(/^.+myid\>/,"",$2);sub(/\)\(\?\<mydomain.+$/,"."suff,$2);print $2}' $_f | head -1)"."$DOMAIN
+	_domain=$(awk -v suff=$_suff '/server_name/{sub(/^.+myid./,"",$2);sub(/....mydomain.+$/,"."suff,$2);print $2}' $_f | head -1)"."$DOMAIN
 	# _domain=$(awk -v suff=$_suff '/server_name/{sub(/*;$/,suff,$2);print $2}' $_f | head -1)"."$DOMAIN
 	_path=$(awk '/location \/[^ ]/{print $2}' $_f | head -1)
 	_port=443
