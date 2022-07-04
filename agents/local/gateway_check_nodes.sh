@@ -314,7 +314,7 @@ if [ -f "$mbr" ]; then $mbr node nodeinfo >/dev/null; fi
 tmp=$(mktemp)
 echo "0 node_info - $(TZ=":Asia/Ho_Chi_Minh" date) hostname=$(hostname) status=${_status} operateStatus=${_opstatus} type=$type ip=$_myip id=$_node_id blockchain=$_blockchain network=$_network continent=$_continent country=$_country" >>$tmp
 if [ -f "$SITE_ROOT/logs/node_scores" ]; then
-	echo "0 node_scores - $(cat $SITE_ROOT/logs/node_scores | awk '{printf("%s:%s ",$1,$2);}')" >>$tmp
+	echo "0 node_scores - $(cat $SITE_ROOT/logs/node_scores | awk 'NF > 0 {printf("%s:%s ",$1,$2);}')" >>$tmp
 fi
 _node_check >>$tmp
 _http_api >>$tmp
