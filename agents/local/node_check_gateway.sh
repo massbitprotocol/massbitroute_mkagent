@@ -38,6 +38,8 @@ if [ -f "$_raw_f" ]; then
 	_opstatus=$(cat $_raw_f | jq .operateStatus | sed 's/\"//g')
 fi
 
+if [ \( -z "$_continent" \) -o \( -z "$_country" \) ]; then exit 0; fi
+
 check_http="/usr/lib/nagios/plugins/check_http"
 _http() {
 	_hostname=$1
@@ -83,11 +85,17 @@ _node_check_geo() {
 	_tmpd=$1
 	_type=$2
 
-	for _ss in 0-1 1-1; do
+	_status=0
+
+	# for _ss in 0-1 1-1; do
+	for _ss in 1-1; do
 		_listid=listid-${_blockchain}-${_network}${_type}-$_ss
 		timeout 3 curl -skL https://portal.$DOMAIN/deploy/info/gateway/$_listid >/tmp/$_listid
 		if [ $? -ne 0 ]; then continue; fi
 		echo >>/tmp/$_listid
+		_n=$(awk 'NF > 0' /tmp/$_listid | wc -l)
+		if [ $_n -gt 0 ]; then _status=1; fi
+
 		cat /tmp/$_listid | while read _id _user _block _net _ip _continent _country _token _status _approve _remain; do
 			if [ -z "$_id" ]; then continue; fi
 			if [ -f "$_tmpd/$_id" ]; then continue; fi
@@ -102,15 +110,23 @@ _node_check_geo() {
 		done
 	done
 
+	return $_status
 }
 _node_check() {
+	_st=0
 	_node_check_dir=$(mktemp -d)
 	_type="-${_continent}-${_country}"
 	_node_check_geo $_node_check_dir $_type
-	# _type="-${_continent}"
-	# _node_check_geo $_node_check_dir $_type
-	# _type=""
-	# _node_check_geo $_node_check_dir $_type
+	_st=$?
+	if [ $_st -eq 0 ]; then
+		_type="-${_continent}"
+		_node_check_geo $_node_check_dir $_type
+		_st=$?
+	fi
+	if [ $_st -eq 0 ]; then
+		_type=""
+		_node_check_geo $_node_check_dir $_type
+	fi
 	rm -rf $_node_check_dir
 }
 cache=$1
