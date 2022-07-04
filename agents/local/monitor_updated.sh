@@ -1,4 +1,5 @@
 #!/bin/sh
+exit 0
 _check() {
 	_f=$1
 	_type=$2
