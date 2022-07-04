@@ -129,7 +129,9 @@ _http_api_check_geo() {
 		if [ $? -ne 0 ]; then
 			continue
 		fi
-		_n=$(wc -l /tmp/$_listid | cut -d' ' -f1)
+		echo >>/tmp/$_listid
+
+		_n=$(awk 'NF > 0' /tmp/$_listid | wc -l)
 		if [ $_n -gt 0 ]; then _status=1; fi
 		echo >>/tmp/$_listid
 		cat /tmp/$_listid | while read _id _user _block _net _ip _continent _country _token _status _approve _remain; do
@@ -261,9 +263,10 @@ _node_check_geo() {
 		_listid=listid-${_blockchain}-${_network}${_type}-$_ss
 		timeout 3 curl -skL https://portal.$DOMAIN/deploy/info/node/$_listid >/tmp/$_listid
 		if [ $? -ne 0 ]; then continue; fi
-		_n=$(wc -l /tmp/$_listid | cut -d' ' -f1)
-		if [ $_n -gt 0 ]; then _status=1; fi
 		echo >>/tmp/$_listid
+		_n=$(awk 'NF > 0' /tmp/$_listid | wc -l)
+		if [ $_n -gt 0 ]; then _status=1; fi
+
 		cat /tmp/$_listid | while read _id _user _block _net _ip _continent _country _token _status _approve _remain; do
 			if [ -z "$_id" ]; then continue; fi
 			if [ -f "$_tmpd/$_id" ]; then continue; fi
