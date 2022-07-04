@@ -159,14 +159,9 @@ _http_api_check() {
 _http_api() {
 	_f=$(ls /massbit/massbitroute/app/src/sites/services/gateway/http.d/dapi-*.conf | head -1)
 	_suff=${_blockchain}"-"${_network}
-	_domain=$(awk -v suff=$_suff '/server_name/{sub(/^.+myid./,"",$2);sub(/....mydomain.+$/,"."suff,$2);print $2}' $_f | head -1)"."$DOMAIN
-	# _domain=$(awk -v suff=$_suff '/server_name/{sub(/*;$/,suff,$2);print $2}' $_f | head -1)"."$DOMAIN
+	_domain=$(awk -v suff=$_suff '/server_name/{sub(/^.+myid./,"",$2);sub(/....mydomain.+$/,"-"suff,$2);print $2}' $_f | head -1)"."$DOMAIN
 	_path=$(awk '/location \/[^ ]/{print $2}' $_f | head -1)
 	_port=443
-	# _ip_google=$(nslookup -type=A $_domain 8.8.8.8 | awk '/Address:/{print $2}' | tail -1)
-
-	# _ip=$(host $_domain | awk '{print $4}' | head -1)
-	#	_ip="127.0.0.1"
 	_token="empty"
 	if [ -n "$_domain" ]; then
 
