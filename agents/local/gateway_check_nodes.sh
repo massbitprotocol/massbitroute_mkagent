@@ -312,7 +312,7 @@ mbr=$SITE_ROOT/mbr
 if [ -f "$mbr" ]; then $mbr node nodeinfo >/dev/null; fi
 
 tmp=$(mktemp)
-echo "0 node_info - hostname=$(hostname) status=${_status} operateStatus=${_opstatus} type=$type ip=$_myip id=$_node_id blockchain=$_blockchain network=$_network continent=$_continent country=$_country" >>$tmp
+echo "0 node_info - $(date) hostname=$(hostname) status=${_status} operateStatus=${_opstatus} type=$type ip=$_myip id=$_node_id blockchain=$_blockchain network=$_network continent=$_continent country=$_country" >>$tmp
 if [ -f "$SITE_ROOT/logs/node_scores" ]; then
 	echo "0 node_scores - $(cat $SITE_ROOT/logs/node_scores | awk '{printf("%s:%s ",$1,$2);}')" >>$tmp
 fi
