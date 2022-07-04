@@ -63,6 +63,7 @@ if [ -f "$_raw_f" ]; then
 	_opstatus=$(cat $_raw_f | jq .operateStatus | sed 's/\"//g')
 fi
 
+if [ \( -z "$_continent" \) -o \( -z "$_country" \)]; then return; fi
 _http() {
 	_hostname=$1
 
