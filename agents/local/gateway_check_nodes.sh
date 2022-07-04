@@ -119,10 +119,14 @@ _http_api_check_geo() {
 	_tmpd=$3
 	_type=$4
 
+	_status=0
 	# _tmp=$(mktemp)
-	for _ss in 0-1 1-1; do
+	for _ss in 1-1; do
+		# for _ss in 0-1 1-1; do
 		_listid=listid-${_blockchain}-${_network}${_type}-$_ss
 		timeout 3 curl -skL https://portal.$DOMAIN/deploy/info/gateway/$_listid >/tmp/$_listid
+		_n=$(wc -l /tmp/$_listid | cut -d' ' -f1)
+		if [ $_n -gt 0 ]; then _status=1; fi
 		if [ $? -ne 0 ]; then
 			continue
 		fi
@@ -143,6 +147,7 @@ _http_api_check_geo() {
 	done
 	# cat $_tmp
 	# rm $_tmp
+	return $_status
 
 }
 _http_api_check() {
@@ -150,11 +155,19 @@ _http_api_check() {
 	_pt=$2
 	_api_check_dir=$(mktemp -d)
 	_type="-${_continent}-${_country}"
+	_st=0
+	_st1=0
 	_http_api_check_geo $_dm $_pt $_api_check_dir $_type
-	_type="-${_continent}"
-	_http_api_check_geo $_dm $_pt $_api_check_dir $_type
-	_type=""
-	_http_api_check_geo $_dm $_pt $_api_check_dir $_type
+	_st=$?
+	if [ $_st -eq 0 ]; then
+		_type="-${_continent}"
+		_http_api_check_geo $_dm $_pt $_api_check_dir $_type
+		_st1=$?
+	fi
+	if [ $_st1 -eq 0 ]; then
+		_type=""
+		_http_api_check_geo $_dm $_pt $_api_check_dir $_type
+	fi
 	rm -rf $_api_check_dir
 }
 _http_api() {
@@ -243,7 +256,8 @@ _node_check_geo() {
 	_tmpd=$1
 	_type=$2
 
-	for _ss in 0-1 1-1; do
+	# for _ss in 0-1 1-1; do
+	for _ss in 1-1; do
 		_listid=listid-${_blockchain}-${_network}${_type}-$_ss
 		timeout 3 curl -skL https://portal.$DOMAIN/deploy/info/node/$_listid >/tmp/$_listid
 		if [ $? -ne 0 ]; then continue; fi
