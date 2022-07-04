@@ -157,15 +157,14 @@ _http_api_check() {
 	_api_check_dir=$(mktemp -d)
 	_type="-${_continent}-${_country}"
 	_st=0
-	_st1=0
 	_http_api_check_geo $_dm $_pt $_api_check_dir $_type
 	_st=$?
 	if [ $_st -eq 0 ]; then
 		_type="-${_continent}"
 		_http_api_check_geo $_dm $_pt $_api_check_dir $_type
-		_st1=$?
+		_st=$?
 	fi
-	if [ $_st1 -eq 0 ]; then
+	if [ $_st -eq 0 ]; then
 		_type=""
 		_http_api_check_geo $_dm $_pt $_api_check_dir $_type
 	fi
@@ -286,7 +285,6 @@ _node_check_geo() {
 }
 _node_check() {
 	_st=0
-	_st1=0
 	_node_check_dir=$(mktemp -d)
 	_type="-${_continent}-${_country}"
 	_node_check_geo $_node_check_dir $_type
@@ -294,9 +292,9 @@ _node_check() {
 	if [ $_st -eq 0 ]; then
 		_type="-${_continent}"
 		_node_check_geo $_node_check_dir $_type
-		_st1=$?
+		_st=$?
 	fi
-	if [ $_st1 -eq 0 ]; then
+	if [ $_st -eq 0 ]; then
 		_type=""
 		_node_check_geo $_node_check_dir $_type
 	fi
