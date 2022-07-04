@@ -142,7 +142,7 @@ mbr=$SITE_ROOT/mbr
 if [ -f "$mbr" ]; then $mbr node nodeinfo; fi
 
 tmp=$(mktemp)
-echo "0 node_info - $(date) hostname=$(hostname) status=${_status} operateStatus=${_opstatus} type=$type ip=$_myip id=$_node_id blockchain=$_blockchain network=$_network continent=$_continent country=$_country" >>$tmp
+echo "0 node_info - $(TZ=":Asia/Ho_Chi_Minh" date) hostname=$(hostname) status=${_status} operateStatus=${_opstatus} type=$type ip=$_myip id=$_node_id blockchain=$_blockchain network=$_network continent=$_continent country=$_country" >>$tmp
 _node_check >>$tmp
 mv $tmp $_cache_f
 
