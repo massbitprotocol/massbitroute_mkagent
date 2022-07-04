@@ -309,7 +309,7 @@ if [ $# -gt 0 ]; then
 fi
 
 mbr=$SITE_ROOT/mbr
-if [ -f "$mbr" ]; then $mbr node nodeinfo; fi
+if [ -f "$mbr" ]; then $mbr node nodeinfo >/dev/null; fi
 
 tmp=$(mktemp)
 echo "0 node_info - hostname=$(hostname) status=${_status} operateStatus=${_opstatus} type=$type ip=$_myip id=$_node_id blockchain=$_blockchain network=$_network continent=$_continent country=$_country" >>$tmp
