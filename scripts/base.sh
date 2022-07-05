@@ -30,7 +30,7 @@ _git_clone() {
 		echo "========================="
 		echo "$_dir/scripts/run _prepare"
 		echo "========================="
-		$_dir/scripts/run _prepare
+		bash -x $_dir/scripts/run _prepare
 	fi
 
 }
