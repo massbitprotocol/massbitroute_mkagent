@@ -3,7 +3,7 @@ SITE_ROOT=$(realpath $(dirname $(realpath $0))/..)
 # pip="pip install "
 cd $SITE_ROOT
 _prepare() {
-	apt install -y python3 python3-pip parallel
+	# apt install -y python3 python3-pip parallel
 	# $pip --upgrade pip
 	pip install -r $SITE_ROOT/agents/requirements.txt
 }
