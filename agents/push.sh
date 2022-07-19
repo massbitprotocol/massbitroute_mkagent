@@ -17,6 +17,7 @@ cd $dir
 if [ ! -f "/usr/bin/parallel" ]; then apt install -y parallel; fi
 log_local_check=$SITE_ROOT/logs/local_check.log
 log_push=$SITE_ROOT/logs/monitor_push.log
+mkdir -p /massbit/massbitroute/app/src/sites/services/mkagent/agents
 state_dir=/massbit/massbitroute/app/src/sites/services/mkagent/agents/state
 mkdir -p $state_dir
 _update_local_check() {
