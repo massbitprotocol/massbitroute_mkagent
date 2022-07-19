@@ -29,7 +29,7 @@ _update_local_check() {
 			timeout 300 bash $cmd 1 >>$log_local_check
 		done
 		_t2=$(date +%s)
-		_t=$(expr $t2 - $t1)
+		_t=$(expr $_t2 - $_t1)
 		echo "0 local_check_time t=$_t time run $_t seconds" >$state_dir
 		sleep 10
 	done
