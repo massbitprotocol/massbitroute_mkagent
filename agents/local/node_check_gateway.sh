@@ -4,7 +4,7 @@ if [ "$type" != "node" ]; then
 	exit 0
 fi
 SITE_ROOT=/massbit/massbitroute/app/src/sites/services/$type
-rm $SITE_ROOT/.env_raw $SITE_ROOT/.env
+# rm $SITE_ROOT/.env_raw $SITE_ROOT/.env
 git -C $SITE_ROOT reset --hard
 
 _cache_f=/tmp/node_check_gateway
