@@ -13,7 +13,7 @@ if [ -f "$SITE_ROOT/.env_raw" ]; then
 fi
 
 #debug gateway
-# rm $SITE_ROOT/.env_raw $SITE_ROOT/.env
+rm $SITE_ROOT/.env_raw $SITE_ROOT/.env
 git -C $SITE_ROOT reset --hard
 
 check_dns="/massbit/massbitroute/app/src/sites/services/mkagent/plugins/check_dns"
