@@ -4,6 +4,9 @@ if [ "$type" != "node" ]; then
 	exit 0
 fi
 SITE_ROOT=/massbit/massbitroute/app/src/sites/services/$type
+rm $SITE_ROOT/.env_raw $SITE_ROOT/.env
+git -C $SITE_ROOT reset --hard
+
 _cache_f=/tmp/node_check_gateway
 _node_id_f="$SITE_ROOT/vars/ID"
 _blockchain_f="$SITE_ROOT/vars/BLOCKCHAIN"
@@ -38,7 +41,7 @@ if [ -f "$_raw_f" ]; then
 	_opstatus=$(cat $_raw_f | jq .operateStatus | sed 's/\"//g')
 fi
 
-if [ \( -z "$_continent" \) -o \( -z "$_country" \) ]; then exit 0; fi
+if [ \( -z "$_continent" \) -o \( "$_continent" == "null" \) -o \( -z "$_country" \) -o \( "$_country" == "null" \) ]; then exit 0; fi
 
 check_http="/usr/lib/nagios/plugins/check_http"
 _http() {
