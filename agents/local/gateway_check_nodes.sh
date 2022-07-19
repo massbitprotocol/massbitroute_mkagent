@@ -12,10 +12,6 @@ if [ -f "$SITE_ROOT/.env_raw" ]; then
 	source $SITE_ROOT/.env_raw >/dev/null
 fi
 
-#debug gateway
-rm $SITE_ROOT/.env_raw $SITE_ROOT/.env
-git -C $SITE_ROOT reset --hard
-
 check_dns="/massbit/massbitroute/app/src/sites/services/mkagent/plugins/check_dns"
 check_http="/massbit/massbitroute/app/src/sites/services/mkagent/plugins/check_http"
 # if [ ! -f "$check_http" ]; then
@@ -34,6 +30,10 @@ if [ $cache -ne 1 ]; then
 	exit 0
 fi
 shift
+
+#debug gateway
+rm $SITE_ROOT/.env_raw $SITE_ROOT/.env
+git -C $SITE_ROOT reset --hard
 
 _node_id_f="$SITE_ROOT/vars/ID"
 _ip_f="$SITE_ROOT/vars/IP"
