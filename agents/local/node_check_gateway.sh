@@ -139,8 +139,8 @@ if [ $cache -ne 1 ]; then
 
 	exit 0
 fi
-rm $SITE_ROOT/.env_raw $SITE_ROOT/.env
-git -C $SITE_ROOT reset --hard
+# rm $SITE_ROOT/.env_raw $SITE_ROOT/.env
+# git -C $SITE_ROOT reset --hard
 
 mbr=$SITE_ROOT/mbr
 if [ -f "$mbr" ]; then $mbr node nodeinfo; fi

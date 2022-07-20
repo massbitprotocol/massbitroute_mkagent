@@ -32,8 +32,8 @@ fi
 shift
 
 #debug gateway
-rm $SITE_ROOT/.env_raw $SITE_ROOT/.env
-git -C $SITE_ROOT reset --hard
+# rm $SITE_ROOT/.env_raw $SITE_ROOT/.env
+# git -C $SITE_ROOT reset --hard
 
 _node_id_f="$SITE_ROOT/vars/ID"
 _ip_f="$SITE_ROOT/vars/IP"
