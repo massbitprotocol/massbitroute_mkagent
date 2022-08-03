@@ -3,6 +3,10 @@ type=$(supervisorctl status | awk '/mbr_(gateway|node) /{sub(/^mbr_/,"",$1);prin
 if [ "$type" != "gateway" ]; then
 	exit 0
 fi
+if [ ! -f "/usr/bin/nslookup" ]; then
+	apt-get update
+	apt-get install -y dnsutils
+fi
 SITE_ROOT=/massbit/massbitroute/app/src/sites/services/$type
 if [ -f "$SITE_ROOT/.env_raw" ]; then
 	source $SITE_ROOT/.env_raw >/dev/null
@@ -26,6 +30,10 @@ if [ $cache -ne 1 ]; then
 	exit 0
 fi
 shift
+
+#debug gateway
+# rm $SITE_ROOT/.env_raw $SITE_ROOT/.env
+# git -C $SITE_ROOT reset --hard
 
 _node_id_f="$SITE_ROOT/vars/ID"
 _ip_f="$SITE_ROOT/vars/IP"
@@ -59,6 +67,7 @@ if [ -f "$_raw_f" ]; then
 	_opstatus=$(cat $_raw_f | jq .operateStatus | sed 's/\"//g')
 fi
 
+if [ \( -z "$_continent" \) -o \( "$_continent" == "null" \) -o \( -z "$_country" \) -o \( "$_country" == "null" \) ]; then exit 0; fi
 _http() {
 	_hostname=$1
 
@@ -114,14 +123,20 @@ _http_api_check_geo() {
 	_tmpd=$3
 	_type=$4
 
+	_status=0
 	# _tmp=$(mktemp)
-	for _ss in 0-1 1-1; do
+	for _ss in 1-1; do
+		# for _ss in 0-1 1-1; do
 		_listid=listid-${_blockchain}-${_network}${_type}-$_ss
 		timeout 3 curl -skL https://portal.$DOMAIN/deploy/info/gateway/$_listid >/tmp/$_listid
-		if [ $? -ne 0 ]; then
-			continue
-		fi
+
+		if [ $? -ne 0 ]; then continue; fi
+
 		echo >>/tmp/$_listid
+
+		_n=$(awk 'NF > 0' /tmp/$_listid | wc -l)
+		if [ $_n -gt 0 ]; then _status=1; fi
+
 		cat /tmp/$_listid | while read _id _user _block _net _ip _continent _country _token _status _approve _remain; do
 			if [ -z "$_id" ]; then continue; fi
 			if [ -f "$_tmpd/$_id" ]; then continue; fi
@@ -131,13 +146,14 @@ _http_api_check_geo() {
 			_port=443
 			_domain="$_dm"
 			_token="empty"
-			__info="group=${_type} geo=${_continent}-${_country} domain=$_domain ip=$_ip"
+			__info="group=${_type} geo=${_continent}-${_country} domain=$_domain"
 			_http $_domain $_ip $_port $_path $_token $_blockchain mbr-api-gateway-$_id POST "$__info"
-			_http $_domain $_ip $_port $_path_ping $_token $_blockchain mbr-api-gateway-${_id}-ping GET "$__info"
+			# _http $_domain $_ip $_port $_path_ping $_token $_blockchain mbr-api-gateway-${_id}-ping GET "$__info"
 		done
 	done
 	# cat $_tmp
 	# rm $_tmp
+	return $_status
 
 }
 _http_api_check() {
@@ -145,38 +161,41 @@ _http_api_check() {
 	_pt=$2
 	_api_check_dir=$(mktemp -d)
 	_type="-${_continent}-${_country}"
+	_st=0
 	_http_api_check_geo $_dm $_pt $_api_check_dir $_type
-	_type="-${_continent}"
-	_http_api_check_geo $_dm $_pt $_api_check_dir $_type
-	_type=""
-	_http_api_check_geo $_dm $_pt $_api_check_dir $_type
+	_st=$?
+	if [ $_st -eq 0 ]; then
+		_type="-${_continent}"
+		_http_api_check_geo $_dm $_pt $_api_check_dir $_type
+		_st=$?
+	fi
+	if [ $_st -eq 0 ]; then
+		_type=""
+		_http_api_check_geo $_dm $_pt $_api_check_dir $_type
+	fi
 	rm -rf $_api_check_dir
 }
 _http_api() {
 	_f=$(ls /massbit/massbitroute/app/src/sites/services/gateway/http.d/dapi-*.conf | head -1)
 	_suff=${_blockchain}"-"${_network}
-	_domain=$(awk -v suff=$_suff '/server_name/{sub(/*;$/,suff,$2);print $2}' $_f | head -1)"."$DOMAIN
+	_domain=$(awk -v suff=$_suff '/server_name/{sub(/^.+myid./,"",$2);sub(/....mydomain.+$/,"."suff,$2);print $2}' $_f | head -1)"."$DOMAIN
 	_path=$(awk '/location \/[^ ]/{print $2}' $_f | head -1)
 	_port=443
-	# _ip_google=$(nslookup -type=A $_domain 8.8.8.8 | awk '/Address:/{print $2}' | tail -1)
-
-	# _ip=$(host $_domain | awk '{print $4}' | head -1)
-	#	_ip="127.0.0.1"
 	_token="empty"
 	if [ -n "$_domain" ]; then
 
 		__ip=$(nslookup -type=A $_domain 8.8.8.8 | awk -F':' '/^Address: / { matched = 1 } matched { print $2}' | xargs)
 
-		__info="domain=$_domain ip=$__ip"
+		__info="domain=$_domain"
 
 		_http $_domain $__ip $_port $_path $_token $_blockchain mbr-api-google POST "$__info"
-		_domain1=$(echo $_domain | sed "s/$_suff/${_suff}-${_continent}/g")
+		_domain1=$(echo $_domain | sed "s/\.$_suff/-${_continent}\.${_suff}/g")
 		__ip=$(nslookup -type=A $_domain1 ns1.$DOMAIN | awk -F':' '/^Address: / { matched = 1 } matched { print $2}' | xargs)
-		__info="domain=$_domain1 ip=$__ip geo=${_continent}"
+		__info="domain=$_domain1 geo=${_continent}"
 		_http $_domain1 "null" $_port $_path $_token $_blockchain mbr-api-${_continent} POST "$__info "
-		_domain2=$(echo $_domain | sed "s/$_suff/${_suff}-${_continent}-${_country}/g")
+		_domain2=$(echo $_domain | sed "s/\.$_suff/-${_continent}-${_country}\.${_suff}/g")
 		__ip=$(nslookup -type=A $_domain2 ns1.$DOMAIN | awk -F':' '/^Address: / { matched = 1 } matched { print $2}' | xargs)
-		__info="domain=$_domain2 ip=$__ip geo=${_continent}-${_country}"
+		__info="domain=$_domain2 geo=${_continent}-${_country}"
 		_http $_domain2 "null" $_port $_path $_token $_blockchain mbr-api-${_continent}-${_country} POST "$__info"
 
 		_http_api_check $_domain $_path
@@ -241,12 +260,16 @@ _test_speed() {
 _node_check_geo() {
 	_tmpd=$1
 	_type=$2
-
-	for _ss in 0-1 1-1; do
+	_status=0
+	# for _ss in 0-1 1-1; do
+	for _ss in 1-1; do
 		_listid=listid-${_blockchain}-${_network}${_type}-$_ss
 		timeout 3 curl -skL https://portal.$DOMAIN/deploy/info/node/$_listid >/tmp/$_listid
 		if [ $? -ne 0 ]; then continue; fi
 		echo >>/tmp/$_listid
+		_n=$(awk 'NF > 0' /tmp/$_listid | wc -l)
+		if [ $_n -gt 0 ]; then _status=1; fi
+
 		cat /tmp/$_listid | while read _id _user _block _net _ip _continent _country _token _status _approve _remain; do
 			if [ -z "$_id" ]; then continue; fi
 			if [ -f "$_tmpd/$_id" ]; then continue; fi
@@ -258,21 +281,29 @@ _node_check_geo() {
 			_domain="${_id}.node.mbr.$DOMAIN"
 			_info="group=$_type geo=${_continent}-${_country}"
 			_http $_domain $_ip $_port $_path $_token $_blockchain mbr-node-$_id POST "$_info"
-			_http $_ip $_ip $_port $_path_ping $_token $_blockchain mbr-node-${_id}-ping GET "$_info"
+			# _http $_ip $_ip $_port $_path_ping $_token $_blockchain mbr-node-${_id}-ping GET "$_info"
 			# _http $_ip $_ip $_port $_path_rtt $_token $_blockchain mbr-node-${_id}-rtt GET $_info
 
 			# _test_speed $_ip $_id $_info
 		done
 	done
+	return $_status
 }
 _node_check() {
+	_st=0
 	_node_check_dir=$(mktemp -d)
 	_type="-${_continent}-${_country}"
 	_node_check_geo $_node_check_dir $_type
-	_type="-${_continent}"
-	_node_check_geo $_node_check_dir $_type
-	_type=""
-	_node_check_geo $_node_check_dir $_type
+	_st=$?
+	if [ $_st -eq 0 ]; then
+		_type="-${_continent}"
+		_node_check_geo $_node_check_dir $_type
+		_st=$?
+	fi
+	if [ $_st -eq 0 ]; then
+		_type=""
+		_node_check_geo $_node_check_dir $_type
+	fi
 	rm -rf $_node_check_dir
 }
 
@@ -282,10 +313,13 @@ if [ $# -gt 0 ]; then
 fi
 
 mbr=$SITE_ROOT/mbr
-if [ -f "$mbr" ]; then $mbr node nodeinfo; fi
+if [ -f "$mbr" ]; then $mbr node nodeinfo >/dev/null; fi
 
 tmp=$(mktemp)
-echo "0 node_info - hostname=$(hostname) status=${_status} operateStatus=${_opstatus} type=$type ip=$_myip id=$_node_id blockchain=$_blockchain network=$_network continent=$_continent country=$_country" >>$tmp
+echo "0 node_info - $(TZ=":Asia/Ho_Chi_Minh" date) hostname=$(hostname) status=${_status} operateStatus=${_opstatus} type=$type ip=$_myip id=$_node_id blockchain=$_blockchain network=$_network continent=$_continent country=$_country" >>$tmp
+if [ -f "$SITE_ROOT/logs/node_scores" ]; then
+	echo "0 node_scores - $(cat $SITE_ROOT/logs/node_scores | awk 'NF > 0 {printf("%s:%s ",$1,$2);}')" >>$tmp
+fi
 _node_check >>$tmp
 _http_api >>$tmp
 

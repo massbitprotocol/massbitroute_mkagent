@@ -4,6 +4,7 @@ if [ "$type" != "node" ]; then
 	exit 0
 fi
 SITE_ROOT=/massbit/massbitroute/app/src/sites/services/$type
+
 _cache_f=/tmp/node_check_gateway
 _node_id_f="$SITE_ROOT/vars/ID"
 _blockchain_f="$SITE_ROOT/vars/BLOCKCHAIN"
@@ -37,6 +38,8 @@ if [ -f "$_raw_f" ]; then
 	_status=$(cat $_raw_f | jq .status | sed 's/\"//g')
 	_opstatus=$(cat $_raw_f | jq .operateStatus | sed 's/\"//g')
 fi
+
+if [ \( -z "$_continent" \) -o \( "$_continent" == "null" \) -o \( -z "$_country" \) -o \( "$_country" == "null" \) ]; then exit 0; fi
 
 check_http="/usr/lib/nagios/plugins/check_http"
 _http() {
@@ -83,11 +86,17 @@ _node_check_geo() {
 	_tmpd=$1
 	_type=$2
 
-	for _ss in 0-1 1-1; do
+	_status=0
+
+	# for _ss in 0-1 1-1; do
+	for _ss in 1-1; do
 		_listid=listid-${_blockchain}-${_network}${_type}-$_ss
 		timeout 3 curl -skL https://portal.$DOMAIN/deploy/info/gateway/$_listid >/tmp/$_listid
 		if [ $? -ne 0 ]; then continue; fi
 		echo >>/tmp/$_listid
+		_n=$(awk 'NF > 0' /tmp/$_listid | wc -l)
+		if [ $_n -gt 0 ]; then _status=1; fi
+
 		cat /tmp/$_listid | while read _id _user _block _net _ip _continent _country _token _status _approve _remain; do
 			if [ -z "$_id" ]; then continue; fi
 			if [ -f "$_tmpd/$_id" ]; then continue; fi
@@ -98,19 +107,27 @@ _node_check_geo() {
 			_domain="$_id.gw.mbr.$DOMAIN"
 			_info="geo=${_continent}-${_country}"
 			_http $_domain $_ip $_port $_path $_token $_blockchain mbr-gateway-$_id POST $_info
-			_http $_ip $_ip $_port $_path_ping $_token $_blockchain mbr-gateway-${_id}-ping GET $_info
+			# _http $_ip $_ip $_port $_path_ping $_token $_blockchain mbr-gateway-${_id}-ping GET $_info
 		done
 	done
 
+	return $_status
 }
 _node_check() {
+	_st=0
 	_node_check_dir=$(mktemp -d)
 	_type="-${_continent}-${_country}"
 	_node_check_geo $_node_check_dir $_type
-	# _type="-${_continent}"
-	# _node_check_geo $_node_check_dir $_type
-	# _type=""
-	# _node_check_geo $_node_check_dir $_type
+	_st=$?
+	if [ $_st -eq 0 ]; then
+		_type="-${_continent}"
+		_node_check_geo $_node_check_dir $_type
+		_st=$?
+	fi
+	if [ $_st -eq 0 ]; then
+		_type=""
+		_node_check_geo $_node_check_dir $_type
+	fi
 	rm -rf $_node_check_dir
 }
 cache=$1
@@ -122,11 +139,14 @@ if [ $cache -ne 1 ]; then
 
 	exit 0
 fi
+# rm $SITE_ROOT/.env_raw $SITE_ROOT/.env
+# git -C $SITE_ROOT reset --hard
+
 mbr=$SITE_ROOT/mbr
 if [ -f "$mbr" ]; then $mbr node nodeinfo; fi
 
 tmp=$(mktemp)
-echo "0 node_info - hostname=$(hostname) status=${_status} operateStatus=${_opstatus} type=$type ip=$_myip id=$_node_id blockchain=$_blockchain network=$_network continent=$_continent country=$_country" >>$tmp
+echo "0 node_info - $(TZ=":Asia/Ho_Chi_Minh" date) hostname=$(hostname) status=${_status} operateStatus=${_opstatus} type=$type ip=$_myip id=$_node_id blockchain=$_blockchain network=$_network continent=$_continent country=$_country" >>$tmp
 _node_check >>$tmp
 mv $tmp $_cache_f
 
