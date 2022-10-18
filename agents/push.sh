@@ -43,7 +43,7 @@ _push() {
 		exit 1
 	fi
 
-	if [ -z "$MONITOR_SCHEME"]; then
+	if [ -z "$MONITOR_SCHEME" ]; then
 		echo "MONITOR_SCHEME not set"
 		exit 1
 	fi
