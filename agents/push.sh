@@ -10,8 +10,8 @@ if [ "$SITE_ROOT" == "_kill" ]; then
 	exit 0
 fi
 
-source $SITE_ROOT/.env_raw
-export PORTAL_DOMAIN=portal.$DOMAIN
+source $SITE_ROOT/env/env.sh
+# export PORTAL_DOMAIN=portal.$DOMAIN
 
 cd $dir
 if [ ! -f "/usr/bin/parallel" ]; then apt install -y parallel; fi
@@ -38,20 +38,29 @@ _update_local_check() {
 	done
 }
 _push() {
-
-	if [ ! -f "/etc/hosts.backup" ]; then
-		sed '/.mbr./d' /etc/hosts >/etc/hosts.backup
-	else
-		tmp=$(mktemp)
-		curl -ksSfL https://$PORTAL_DOMAIN/deploy/info/hosts -o $tmp >/dev/nul
-		if [ $? -eq 0 ]; then
-			cp /etc/hosts.backup ${tmp}.1
-			echo "#MBR hosts" >>${tmp}.1
-			grep '.mbr.' $tmp >>${tmp}.1
-			cp ${tmp}.1 /etc/hosts
-			rm ${tmp}*
-		fi
+	if [ -z "$DOMAIN"]; then
+		echo "DOMAIN not set"
+		exit 1
 	fi
+
+	if [ -z "$MONITOR_SCHEME"]; then
+		echo "MONITOR_SCHEME not set"
+		exit 1
+	fi
+
+	# if [ ! -f "/etc/hosts.backup" ]; then
+	# 	sed '/.mbr./d' /etc/hosts >/etc/hosts.backup
+	# else
+	# 	tmp=$(mktemp)
+	# 	curl -ksSfL https://$PORTAL_DOMAIN/deploy/info/hosts -o $tmp >/dev/nul
+	# 	if [ $? -eq 0 ]; then
+	# 		cp /etc/hosts.backup ${tmp}.1
+	# 		echo "#MBR hosts" >>${tmp}.1
+	# 		grep '.mbr.' $tmp >>${tmp}.1
+	# 		cp ${tmp}.1 /etc/hosts
+	# 		rm ${tmp}*
+	# 	fi
+	# fi
 
 	# curl -ksSfL https://$PORTAL_DOMAIN/deploy/info/hosts -o $tmp >/dev/nul
 	# echo >>$tmp
@@ -70,20 +79,23 @@ _push() {
 	# ok1 export MK_SKIP_PS=true
 
 	TYPE=$(cat $SITE_ROOT/vars/TYPE)
-	if [ ! -f "$SITE_ROOT/vars/ID" ]; then
-		echo 1 >$SITE_ROOT/vars/ID
-	fi
+	# if [ ! -f "$SITE_ROOT/vars/ID" ]; then
+	# 	echo 1 >$SITE_ROOT/vars/ID
+	# fi
 
-	ID=$(cat $SITE_ROOT/vars/ID)
-	TK="${TYPE}-${ID}"
+	# ID=$(cat $SITE_ROOT/vars/ID)
+	# TK="${TYPE}-${ID}"
 	if [ \( "$TYPE" = "gateway" \) -o \( "$TYPE" = "node" \) ]; then
 		export BLOCKCHAIN=$(cat $SITE_ROOT/vars/BLOCKCHAIN)
 		export NETWORK=$(cat $SITE_ROOT/vars/NETWORK)
-		export URL=https://${TYPE}-${BLOCKCHAIN}-${NETWORK}.monitor.mbr.$DOMAIN
-		TK="${TYPE}-${BLOCKCHAIN}-${NETWORK}-${ID}"
+		export URL=$MONITOR_SCHEME://${TYPE}-${BLOCKCHAIN}-${NETWORK}.monitor.mbr.$DOMAIN
+		TK="${TYPE}-${BLOCKCHAIN}-${NETWORK}"
 	else
-		TK="${HOSTNAME}"
-		export URL=https://internal.monitor.mbr.$DOMAIN
+
+		ID=$(cat $SITE_ROOT/vars/ID)
+		TK="${TYPE}-${ID}"
+
+		export URL=$MONITOR_SCHEME://internal.monitor.mbr.$DOMAIN
 	fi
 	export TOKEN=$(echo -n ${TK} | sha1sum | cut -d' ' -f1)
 
