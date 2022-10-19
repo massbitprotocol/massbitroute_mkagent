@@ -38,7 +38,7 @@ _update_local_check() {
 	done
 }
 _push() {
-	if [ -z "$DOMAIN"]; then
+	if [ -z "$DOMAIN" ]; then
 		echo "DOMAIN not set"
 		exit 1
 	fi
