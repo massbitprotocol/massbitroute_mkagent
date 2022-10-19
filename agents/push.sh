@@ -83,18 +83,17 @@ _push() {
 	# 	echo 1 >$SITE_ROOT/vars/ID
 	# fi
 
-	# ID=$(cat $SITE_ROOT/vars/ID)
+	ID=$(cat $SITE_ROOT/vars/ID)
+	if [ -z "$ID" ]; then exit 1; fi
 	# TK="${TYPE}-${ID}"
 	if [ \( "$TYPE" = "gateway" \) -o \( "$TYPE" = "node" \) ]; then
 		export BLOCKCHAIN=$(cat $SITE_ROOT/vars/BLOCKCHAIN)
 		export NETWORK=$(cat $SITE_ROOT/vars/NETWORK)
 		export URL=$MONITOR_SCHEME://${TYPE}-${BLOCKCHAIN}-${NETWORK}.monitor.mbr.$DOMAIN
-		TK="${TYPE}-${BLOCKCHAIN}-${NETWORK}"
+		TK="${TYPE}-${BLOCKCHAIN}-${NETWORK}-${ID}"
 	else
 
-		ID=$(cat $SITE_ROOT/vars/ID)
 		TK="${TYPE}-${ID}"
-
 		export URL=$MONITOR_SCHEME://internal.monitor.mbr.$DOMAIN
 	fi
 	export TOKEN=$(echo -n ${TK} | sha1sum | cut -d' ' -f1)
