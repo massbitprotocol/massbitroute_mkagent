@@ -79,9 +79,9 @@ _push() {
 	# ok1 export MK_SKIP_PS=true
 
 	TYPE=$(cat $SITE_ROOT/vars/TYPE)
-	# if [ ! -f "$SITE_ROOT/vars/ID" ]; then
-	# 	echo 1 >$SITE_ROOT/vars/ID
-	# fi
+	if [ ! -f "$SITE_ROOT/vars/ID" ]; then
+		echo 1 >$SITE_ROOT/vars/ID
+	fi
 
 	ID=$(cat $SITE_ROOT/vars/ID)
 	if [ -z "$ID" ]; then exit 1; fi
