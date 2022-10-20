@@ -41,7 +41,7 @@ _update_local_check() {
 		_t2=$(date +%s)
 		_t=$(expr $_t2 - $_t1)
 		echo "0 local_check_time t=$_t time run $_t seconds" >$state_dir
-		sleep 10
+		sleep 30
 	done
 }
 _push() {
@@ -80,6 +80,7 @@ _push() {
 
 		export PUSH_URL=push
 		/usr/bin/python3 push.py >>$log_push
+		sleep 30
 	done
 
 }
