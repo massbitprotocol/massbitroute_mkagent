@@ -10,7 +10,14 @@ if [ "$SITE_ROOT" == "_kill" ]; then
 	exit 0
 fi
 
-source $SITE_ROOT/env/env.sh
+if [ -f "$SITE_ROOT/env/env.sh" ]; then
+	source $SITE_ROOT/env/env.sh
+fi
+
+if [ -f "$SITE_ROOT/data/env/env.sh" ]; then
+	source $SITE_ROOT/data/env/env.sh
+fi
+
 # export PORTAL_DOMAIN=portal.$DOMAIN
 
 cd $dir
