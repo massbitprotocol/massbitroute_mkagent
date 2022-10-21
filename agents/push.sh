@@ -32,7 +32,7 @@ fi
 
 loop() {
 	while true; do
-		$0 $@
+		$0 $SITE_ROOT $@
 		sleep 30
 	done
 
@@ -93,8 +93,8 @@ _push() {
 }
 if [ $# -eq 0 ]; then
 	(
-		echo "$sc $SITE_ROOT _push"
-		echo "$sc $SITE_ROOT _update_local_check"
+		echo "$sc $SITE_ROOT loop _push"
+		echo "$sc $SITE_ROOT loop _update_local_check"
 	) | parallel -j2
 else
 	$@
