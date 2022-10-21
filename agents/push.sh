@@ -79,7 +79,10 @@ _push() {
 		export URL=$MONITOR_SCHEME://${TYPE}-${BLOCKCHAIN}-${NETWORK}.monitor.mbr.$DOMAIN
 		TK="${TYPE}-${BLOCKCHAIN}-${NETWORK}-${ID}"
 	else
-		ID=$HOSTNAME
+		if [ -z "$ID" ]; then
+			ID=$HOSTNAME
+		fi
+
 		TK="${TYPE}-${ID}"
 		export URL=$MONITOR_SCHEME://internal.monitor.mbr.$DOMAIN
 	fi
