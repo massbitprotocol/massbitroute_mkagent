@@ -73,18 +73,34 @@ _push() {
 	ID=$(cat $SITE_ROOT/vars/ID)
 	if [ -z "$ID" ]; then exit 1; fi
 
+	export URL=$MONITOR_SCHEME://internal.monitor.mbr.$DOMAIN
 	if [ \( "$TYPE" = "gateway" \) -o \( "$TYPE" = "node" \) ]; then
 		export BLOCKCHAIN=$(cat $SITE_ROOT/vars/BLOCKCHAIN)
 		export NETWORK=$(cat $SITE_ROOT/vars/NETWORK)
 		export URL=$MONITOR_SCHEME://${TYPE}-${BLOCKCHAIN}-${NETWORK}.monitor.mbr.$DOMAIN
 		TK="${TYPE}-${BLOCKCHAIN}-${NETWORK}-${ID}"
+	elif [ "$TYPE" = "monitor" ]; then
+		export MON_TYPE=$(cat $SITE_ROOT/vars/MONITOR_TYPES)
+		export MON_BLOCK=$(cat $SITE_ROOT/vars/MONITOR_BLOCKCHAINS)
+		export MON_NET=$(cat $SITE_ROOT/vars/MONITOR_NETWORKS)
+
+		TK="${TYPE}-${MON_TYPE}-${MON_BLOCK}-${MON_NET}-${ID}"
+	elif [ "$TYPE" = "stat" ]; then
+		export MON_TYPE=$(cat $SITE_ROOT/vars/STAT_TYPE)
+		export MON_BLOCK=$(cat $SITE_ROOT/vars/STAT_BLOCKCHAIN)
+		export MON_NET=$(cat $SITE_ROOT/vars/STAT_NETWORK)
+		TK="${TYPE}-${MON_TYPE}-${MON_BLOCK}-${MON_NET}-${ID}"
+	elif [ "$TYPE" = "explorer" ]; then
+		export MON_TYPE=$(cat $SITE_ROOT/vars/EXPLORER_TYPE)
+		export MON_BLOCK=$(cat $SITE_ROOT/vars/EXPLORER_BLOCKCHAIN)
+		export MON_NET=$(cat $SITE_ROOT/vars/EXPLORER_NETWORK)
+		TK="${TYPE}-${MON_TYPE}-${MON_BLOCK}-${MON_NET}-${ID}"
 	else
 		if [ -z "$ID" ]; then
 			ID=$HOSTNAME
 		fi
 
 		TK="${TYPE}-${ID}"
-		export URL=$MONITOR_SCHEME://internal.monitor.mbr.$DOMAIN
 	fi
 	export TOKEN=$(echo -n ${TK} | sha1sum | cut -d' ' -f1)
 
