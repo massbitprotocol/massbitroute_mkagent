@@ -10,8 +10,15 @@ if [ "$SITE_ROOT" == "_kill" ]; then
 	exit 0
 fi
 
-source $SITE_ROOT/.env_raw
-export PORTAL_DOMAIN=portal.$DOMAIN
+if [ -f "$SITE_ROOT/env/env.sh" ]; then
+	source $SITE_ROOT/env/env.sh
+fi
+
+if [ -f "$SITE_ROOT/data/env/env.sh" ]; then
+	source $SITE_ROOT/data/env/env.sh
+fi
+
+# export PORTAL_DOMAIN=portal.$DOMAIN
 
 cd $dir
 if [ ! -f "/usr/bin/parallel" ]; then apt install -y parallel; fi
@@ -23,51 +30,40 @@ if [ -d "$state_dir" ]; then
 	rm -rf $state_dir
 fi
 
-_update_local_check() {
+loop() {
 	while true; do
-		echo "$date" >>$log_local_check
-		_t1=$(date +%s)
-		find $dir/local -type f -iname '*.sh' | while read cmd; do
-			echo bash $cmd 1 >>$log_local_check
-			timeout 300 bash $cmd 1 >>$log_local_check
-		done
-		_t2=$(date +%s)
-		_t=$(expr $_t2 - $_t1)
-		echo "0 local_check_time t=$_t time run $_t seconds" >$state_dir
-		sleep 10
+		$0 $SITE_ROOT $@
+		sleep 30
 	done
+
+}
+_update_local_check() {
+	# while true; do
+	echo "$date" >>$log_local_check
+	_t1=$(date +%s)
+	find $dir/local -type f -iname '*.sh' | while read cmd; do
+		echo bash $cmd 1 >>$log_local_check
+		timeout 300 bash $cmd 1 >>$log_local_check
+	done
+	_t2=$(date +%s)
+	_t=$(expr $_t2 - $_t1)
+	echo "0 local_check_time t=$_t time run $_t seconds" >$state_dir
+	# 	sleep 30
+	# done
 }
 _push() {
-
-	if [ ! -f "/etc/hosts.backup" ]; then
-		sed '/.mbr./d' /etc/hosts >/etc/hosts.backup
-	else
-		tmp=$(mktemp)
-		curl -ksSfL https://$PORTAL_DOMAIN/deploy/info/hosts -o $tmp >/dev/nul
-		if [ $? -eq 0 ]; then
-			cp /etc/hosts.backup ${tmp}.1
-			echo "#MBR hosts" >>${tmp}.1
-			grep '.mbr.' $tmp >>${tmp}.1
-			cp ${tmp}.1 /etc/hosts
-			rm ${tmp}*
-		fi
+	# while true; do
+	if [ -z "$DOMAIN" ]; then
+		echo "DOMAIN not set"
+		exit 1
 	fi
 
-	# curl -ksSfL https://$PORTAL_DOMAIN/deploy/info/hosts -o $tmp >/dev/nul
-	# echo >>$tmp
-	# while read _ip _host; do
-	# 	if [ -z "$_ip" ]; then continue; fi
-	# 	echo $_ip $_host
-	# 	grep $_host /etc/hosts >/dev/null
-	# 	if [ $? -ne 0 ]; then
-	# 		echo $_ip $_host >>/etc/hosts
-	# 	fi
-	# done <$tmp
-	# rm $tmp
-	export CHECK_MK_AGENT=$dir/check_mk_agent.linux
-	# export CHECK_MK_AGENT=$dir/check_mk_caching_agent.linux
+	if [ -z "$MONITOR_SCHEME" ]; then
+		echo "MONITOR_SCHEME not set"
+		exit 1
+	fi
 
-	# ok1 export MK_SKIP_PS=true
+	export CHECK_MK_AGENT=$dir/check_mk_agent.linux
 
 	TYPE=$(cat $SITE_ROOT/vars/TYPE)
 	if [ ! -f "$SITE_ROOT/vars/ID" ]; then
@@ -75,33 +71,50 @@ _push() {
 	fi
 
 	ID=$(cat $SITE_ROOT/vars/ID)
-	TK="${TYPE}-${ID}"
+	if [ -z "$ID" ]; then exit 1; fi
+
+	export URL=$MONITOR_SCHEME://internal.monitor.mbr.$DOMAIN
 	if [ \( "$TYPE" = "gateway" \) -o \( "$TYPE" = "node" \) ]; then
 		export BLOCKCHAIN=$(cat $SITE_ROOT/vars/BLOCKCHAIN)
 		export NETWORK=$(cat $SITE_ROOT/vars/NETWORK)
-		export URL=https://${TYPE}-${BLOCKCHAIN}-${NETWORK}.monitor.mbr.$DOMAIN
+		export URL=$MONITOR_SCHEME://${TYPE}-${BLOCKCHAIN}-${NETWORK}.monitor.mbr.$DOMAIN
 		TK="${TYPE}-${BLOCKCHAIN}-${NETWORK}-${ID}"
+	elif [ "$TYPE" = "monitor" ]; then
+		export MON_TYPE=$(cat $SITE_ROOT/vars/MONITOR_TYPES)
+		export MON_BLOCK=$(cat $SITE_ROOT/vars/MONITOR_BLOCKCHAINS)
+		export MON_NET=$(cat $SITE_ROOT/vars/MONITOR_NETWORKS)
+
+		TK="${TYPE}-${MON_TYPE}-${MON_BLOCK}-${MON_NET}-${ID}"
+	elif [ "$TYPE" = "stat" ]; then
+		export MON_TYPE=$(cat $SITE_ROOT/vars/STAT_TYPE)
+		export MON_BLOCK=$(cat $SITE_ROOT/vars/STAT_BLOCKCHAIN)
+		export MON_NET=$(cat $SITE_ROOT/vars/STAT_NETWORK)
+		TK="${TYPE}-${MON_TYPE}-${MON_BLOCK}-${MON_NET}-${ID}"
+	elif [ "$TYPE" = "explorer" ]; then
+		export MON_TYPE=$(cat $SITE_ROOT/vars/EXPLORER_TYPE)
+		export MON_BLOCK=$(cat $SITE_ROOT/vars/EXPLORER_BLOCKCHAIN)
+		export MON_NET=$(cat $SITE_ROOT/vars/EXPLORER_NETWORK)
+		TK="${TYPE}-${MON_TYPE}-${MON_BLOCK}-${MON_NET}-${ID}"
 	else
-		TK="${HOSTNAME}"
-		export URL=https://internal.monitor.mbr.$DOMAIN
+		if [ -z "$ID" ]; then
+			ID=$HOSTNAME
+		fi
+
+		TK="${TYPE}-${ID}"
 	fi
 	export TOKEN=$(echo -n ${TK} | sha1sum | cut -d' ' -f1)
 
 	export PUSH_URL=push
 	/usr/bin/python3 push.py >>$log_push
+	# 	sleep 30
+	# done
+
 }
 if [ $# -eq 0 ]; then
 	(
-		echo "$sc $SITE_ROOT _push"
-		echo "$sc $SITE_ROOT _update_local_check"
+		echo "$sc $SITE_ROOT loop _push"
+		echo "$sc $SITE_ROOT loop _update_local_check"
 	) | parallel -j2
 else
 	$@
 fi
-# if [ $# -le 2 ]; then
-# 	# $pip --upgrade pip
-# 	$pip -r requirements.txt
-# 	python3 push.py
-# else
-# 	$@
-# fi
