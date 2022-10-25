@@ -3,7 +3,7 @@ sc=$(realpath $0)
 dir=$(dirname $sc)
 SITE_ROOT=$1
 if [ -z "$SITE_ROOT" ]; then
-	SITE_ROOT=$dir
+	SITE_ROOT=$(realpath $dir/..)
 else
 	shift
 fi
