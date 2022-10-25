@@ -57,6 +57,60 @@ if [ -d "$state_dir" ]; then
 	rm -rf $state_dir
 fi
 
+if [ -z "$DOMAIN" ]; then
+	echo "DOMAIN not set"
+	exit 1
+fi
+
+if [ -z "$MONITOR_SCHEME" ]; then
+	echo "MONITOR_SCHEME not set"
+	exit 1
+fi
+
+export CHECK_MK_AGENT=$dir/check_mk_agent.linux
+
+TYPE=$(cat $SITE_ROOT/vars/TYPE)
+if [ ! -f "$SITE_ROOT/vars/ID" ]; then
+	echo 1 >$SITE_ROOT/vars/ID
+fi
+
+ID=$(cat $SITE_ROOT/vars/ID)
+if [ -z "$ID" ]; then exit 1; fi
+
+export URL=$MONITOR_SCHEME://internal.monitor.mbr.$DOMAIN
+if [ \( "$TYPE" = "gateway" \) -o \( "$TYPE" = "node" \) ]; then
+	export BLOCKCHAIN=$(cat $SITE_ROOT/vars/BLOCKCHAIN)
+	export NETWORK=$(cat $SITE_ROOT/vars/NETWORK)
+	export URL=$MONITOR_SCHEME://${TYPE}-${BLOCKCHAIN}-${NETWORK}.monitor.mbr.$DOMAIN
+	TK="${TYPE}-${BLOCKCHAIN}-${NETWORK}-${ID}"
+elif [ "$TYPE" = "monitor" ]; then
+	export MON_TYPE=$(cat $SITE_ROOT/vars/MONITOR_TYPES)
+	export MON_BLOCK=$(cat $SITE_ROOT/vars/MONITOR_BLOCKCHAINS)
+	export MON_NET=$(cat $SITE_ROOT/vars/MONITOR_NETWORKS)
+
+	TK="${TYPE}-${MON_TYPE}-${MON_BLOCK}-${MON_NET}-${ID}"
+elif [ "$TYPE" = "stat" ]; then
+	export MON_TYPE=$(cat $SITE_ROOT/vars/STAT_TYPE)
+	export MON_BLOCK=$(cat $SITE_ROOT/vars/STAT_BLOCKCHAIN)
+	export MON_NET=$(cat $SITE_ROOT/vars/STAT_NETWORK)
+	TK="${TYPE}-${MON_TYPE}-${MON_BLOCK}-${MON_NET}-${ID}"
+elif [ "$TYPE" = "explorer" ]; then
+	export MON_TYPE=$(cat $SITE_ROOT/vars/EXPLORER_TYPE)
+	export MON_BLOCK=$(cat $SITE_ROOT/vars/EXPLORER_BLOCKCHAIN)
+	export MON_NET=$(cat $SITE_ROOT/vars/EXPLORER_NETWORK)
+	TK="${TYPE}-${MON_TYPE}-${MON_BLOCK}-${MON_NET}-${ID}"
+else
+	if [ -z "$ID" ]; then
+		ID=$HOSTNAME
+	fi
+
+	TK="${TYPE}-${ID}"
+fi
+export TOKEN=$(echo -n ${TK} | sha1sum | cut -d' ' -f1)
+
+export PUSH_URL=push
+
+echo $TOKEN $TK
 loop() {
 	while true; do
 		$0 $SITE_ROOT $@
@@ -80,58 +134,7 @@ _update_local_check() {
 }
 _push() {
 	# while true; do
-	if [ -z "$DOMAIN" ]; then
-		echo "DOMAIN not set"
-		exit 1
-	fi
 
-	if [ -z "$MONITOR_SCHEME" ]; then
-		echo "MONITOR_SCHEME not set"
-		exit 1
-	fi
-
-	export CHECK_MK_AGENT=$dir/check_mk_agent.linux
-
-	TYPE=$(cat $SITE_ROOT/vars/TYPE)
-	if [ ! -f "$SITE_ROOT/vars/ID" ]; then
-		echo 1 >$SITE_ROOT/vars/ID
-	fi
-
-	ID=$(cat $SITE_ROOT/vars/ID)
-	if [ -z "$ID" ]; then exit 1; fi
-
-	export URL=$MONITOR_SCHEME://internal.monitor.mbr.$DOMAIN
-	if [ \( "$TYPE" = "gateway" \) -o \( "$TYPE" = "node" \) ]; then
-		export BLOCKCHAIN=$(cat $SITE_ROOT/vars/BLOCKCHAIN)
-		export NETWORK=$(cat $SITE_ROOT/vars/NETWORK)
-		export URL=$MONITOR_SCHEME://${TYPE}-${BLOCKCHAIN}-${NETWORK}.monitor.mbr.$DOMAIN
-		TK="${TYPE}-${BLOCKCHAIN}-${NETWORK}-${ID}"
-	elif [ "$TYPE" = "monitor" ]; then
-		export MON_TYPE=$(cat $SITE_ROOT/vars/MONITOR_TYPES)
-		export MON_BLOCK=$(cat $SITE_ROOT/vars/MONITOR_BLOCKCHAINS)
-		export MON_NET=$(cat $SITE_ROOT/vars/MONITOR_NETWORKS)
-
-		TK="${TYPE}-${MON_TYPE}-${MON_BLOCK}-${MON_NET}-${ID}"
-	elif [ "$TYPE" = "stat" ]; then
-		export MON_TYPE=$(cat $SITE_ROOT/vars/STAT_TYPE)
-		export MON_BLOCK=$(cat $SITE_ROOT/vars/STAT_BLOCKCHAIN)
-		export MON_NET=$(cat $SITE_ROOT/vars/STAT_NETWORK)
-		TK="${TYPE}-${MON_TYPE}-${MON_BLOCK}-${MON_NET}-${ID}"
-	elif [ "$TYPE" = "explorer" ]; then
-		export MON_TYPE=$(cat $SITE_ROOT/vars/EXPLORER_TYPE)
-		export MON_BLOCK=$(cat $SITE_ROOT/vars/EXPLORER_BLOCKCHAIN)
-		export MON_NET=$(cat $SITE_ROOT/vars/EXPLORER_NETWORK)
-		TK="${TYPE}-${MON_TYPE}-${MON_BLOCK}-${MON_NET}-${ID}"
-	else
-		if [ -z "$ID" ]; then
-			ID=$HOSTNAME
-		fi
-
-		TK="${TYPE}-${ID}"
-	fi
-	export TOKEN=$(echo -n ${TK} | sha1sum | cut -d' ' -f1)
-
-	export PUSH_URL=push
 	/usr/bin/python3 push.py >>$log_push
 	# 	sleep 30
 	# done
