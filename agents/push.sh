@@ -33,10 +33,22 @@ fi
 # export PORTAL_DOMAIN=portal.$DOMAIN
 
 cd $dir
-if [ ! -f "/usr/bin/parallel" ]; then
+which parallel
+if [ $? -ne 0 ]; then
 	apt update
 	apt install -y parallel
 fi
+which pip3
+if [ $? -ne 0 ]; then
+	apt update
+	apt install -y python3-pip
+fi
+pip3 install -r $SITE_ROOT/agents/requirements.txt
+
+# if [ ! -f "/usr/bin/parallel" ]; then
+# 	apt update
+# 	apt install -y parallel
+# fi
 log_local_check=$SITE_ROOT/logs/local_check.log
 log_push=$SITE_ROOT/logs/monitor_push.log
 mkdir -p /massbit/massbitroute/app/src/sites/services/mkagent/agents
