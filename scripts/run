@@ -10,11 +10,11 @@ _prepare() {
 		apt update
 		apt install -y parallel
 	fi
-	which pip
+	which pip3
 	if [ $? -ne 0 ]; then
 		apt update
-		apt install -y python-pip
+		apt install -y python3-pip
 	fi
-	pip install -r $SITE_ROOT/agents/requirements.txt
+	pip3 install -r $SITE_ROOT/agents/requirements.txt
 }
 $@
