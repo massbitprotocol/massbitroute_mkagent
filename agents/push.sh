@@ -8,6 +8,15 @@ else
 	shift
 fi
 
+mkdir -p $SITE_ROOT/vars
+if [ -n "$MONITOR_TYPE" ]; then
+	echo $MONITOR_TYPE >$SITE_ROOT/vars/TYPE
+fi
+
+if [ -n "$MONITOR_ID" ]; then
+	echo $MONITOR_ID >$SITE_ROOT/vars/ID
+fi
+
 if [ "$SITE_ROOT" == "_kill" ]; then
 	pkill -f push.py
 	exit 0
