@@ -18,10 +18,10 @@ which supervisord
 if [ $? -ne 0 ]; then
 	apt update
 	apt install -y supervisor
-	cat >/etc/supervisor/conf.d/monitor_client.conf <<EOF
+fi
+cat >/etc/supervisor/conf.d/monitor_client.conf <<EOF
 [program:monitor_client]
 command=/massbit/massbitroute/app/src/sites/services/mkagent/agents/push.sh
 autostart=true
 EOF
-	supervisorctl update
-fi
+supervisorctl update
