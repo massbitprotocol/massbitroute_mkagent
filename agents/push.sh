@@ -119,7 +119,7 @@ loop() {
 
 }
 _update_local_check() {
-	_init
+
 	# while true; do
 	echo "$date" >>$log_local_check
 	_t1=$(date +%s)
@@ -134,7 +134,7 @@ _update_local_check() {
 	# done
 }
 _push() {
-	_init
+
 	# while true; do
 
 	/usr/bin/python3 push.py >>$log_push
