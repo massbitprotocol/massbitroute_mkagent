@@ -2,9 +2,12 @@
 sc=$(realpath $0)
 dir=$(dirname $sc)
 SITE_ROOT=$1
-if [ -z "$SITE_ROOT" ]; then exit 0; fi
+if [ -z "$SITE_ROOT" ]; then
+	SITE_ROOT=$dir
+else
+	shift
+fi
 
-shift
 if [ "$SITE_ROOT" == "_kill" ]; then
 	pkill -f push.py
 	exit 0
@@ -21,7 +24,10 @@ fi
 # export PORTAL_DOMAIN=portal.$DOMAIN
 
 cd $dir
-if [ ! -f "/usr/bin/parallel" ]; then apt install -y parallel; fi
+if [ ! -f "/usr/bin/parallel" ]; then
+	apt update
+	apt install -y parallel
+fi
 log_local_check=$SITE_ROOT/logs/local_check.log
 log_push=$SITE_ROOT/logs/monitor_push.log
 mkdir -p /massbit/massbitroute/app/src/sites/services/mkagent/agents
