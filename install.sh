@@ -3,6 +3,7 @@ cd /tmp
 SITE_ROOT=/massbit/massbitroute/app/src/sites/services/mkagent
 mkdir -p $SITE_ROOT
 git clone --depth 1 -b shamu https://github.com/massbitprotocol/massbitroute_mkagent.git /massbit/massbitroute/app/src/sites/services/mkagent
+git -C /massbit/massbitroute/app/src/sites/services/mkagent pull origin shamu
 
 mkdir -p $SITE_ROOT/vars
 if [ -n "$MONITOR_TYPE" ]; then

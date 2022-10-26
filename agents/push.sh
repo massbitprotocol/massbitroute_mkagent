@@ -113,6 +113,7 @@ export PUSH_URL=push
 echo $TOKEN $TK
 loop() {
 	while true; do
+		git -C $SITE_ROOT pull origin shamu
 		$0 $SITE_ROOT $@
 		sleep 30
 	done
