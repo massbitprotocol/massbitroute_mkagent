@@ -32,7 +32,7 @@ fi
 
 # export PORTAL_DOMAIN=portal.$DOMAIN
 
-cd $dir
+
 which parallel
 if [ $? -ne 0 ]; then
 	apt update
@@ -43,7 +43,8 @@ if [ $? -ne 0 ]; then
 	apt update
 	apt install -y python3-pip
 fi
-pip3 install -r $SITE_ROOT/agents/requirements.txt
+cd $dir
+pip3 install -r requirements.txt
 
 # if [ ! -f "/usr/bin/parallel" ]; then
 # 	apt update
