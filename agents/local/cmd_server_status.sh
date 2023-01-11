@@ -1,4 +1,5 @@
 #!/bin/bash
+exit 0
 _type=$(supervisorctl status | awk '$1 !~ /_monitor/ && $1 ~ /^mbr_/{gsub(/^mbr_/,"",$1);print $1}')
 _cmd=/massbit/massbitroute/app/src/sites/services/${_type}/cmd_server
 
