@@ -144,7 +144,9 @@ _push() {
 	# done
 
 }
+
 if [ $# -eq 0 ]; then
+    exit 0
 	(
 		echo "$sc $SITE_ROOT loop _push"
 		echo "$sc $SITE_ROOT loop _update_local_check"
