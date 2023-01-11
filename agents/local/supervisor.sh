@@ -1,4 +1,5 @@
 #!/bin/bash
+exit 0
 tmp=$(mktemp)
 supervisorctl status >$tmp
 n=$(wc -l $tmp | cut -d' ' -f1)
