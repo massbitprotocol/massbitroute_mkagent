@@ -15,7 +15,8 @@ if __name__ == "__main__":
     # print(agent)
     # while True:
     #     try:
-    agent_data = subprocess.check_output([agent])
+    agent_data = ""
+    #subprocess.check_output([agent])
     print(agent_data)
     url_post = "{}/{}/{}".format(url, push_url, token)
     print(url_post)
