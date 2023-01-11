@@ -20,7 +20,7 @@ if __name__ == "__main__":
     print(agent_data)
     url_post = "{}/{}/{}".format(url, push_url, token)
     print(url_post)
-    resp = requests.post(url_post, data=agent_data)
+    #resp = requests.post(url_post, data=agent_data)
     # if resp.status_code != 200:
     #     raise RuntimeError("Server responded with " + str(resp))
         # time.sleep(30)
