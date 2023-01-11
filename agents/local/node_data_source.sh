@@ -1,4 +1,5 @@
 #!/bin/bash
+exit 0
 type=$(supervisorctl status | awk '/mbr_(gateway|node) /{sub(/^mbr_/,"",$1);print $1}')
 if [ "$type" != "node" ]; then
 	exit 0
