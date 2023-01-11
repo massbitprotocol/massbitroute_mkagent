@@ -44,7 +44,7 @@ if [ $? -ne 0 ]; then
 	apt install -y python3-pip
 fi
 cd $dir
-pip3 install -r requirements.txt
+#pip3 install -r requirements.txt
 
 # if [ ! -f "/usr/bin/parallel" ]; then
 # 	apt update
